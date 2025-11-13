@@ -1,12 +1,35 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Open Pokemon Collector</title>
+    <meta
+      name="description"
+      content="Free local pokemon collections!"
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Favicon / icons (adjust paths as needed) -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
+    <noscript>
+      JavaScript is required to run this application.
+    </noscript>
     <div id="app"></div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Vite injects env and HMR in dev; keep type=module -->
+    <script
+      type="module"
+      src="/src/main.tsx"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

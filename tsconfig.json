@@ -10,8 +10,8 @@
       "ES2022"
     ],
     "skipLibCheck": true,
-    "target": "ESNext",
     "skipDefaultLibCheck": true,
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,

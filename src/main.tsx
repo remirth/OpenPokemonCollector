@@ -5,6 +5,17 @@ import './styles.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {NotInitializedError} from './lib/errors';
 
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			throwOnError: (error, query) => {
+				console.error({query: query.queryHash, error});
+				return false;
+			},
+		},
+	},
+});
+
 // Set up a Router instance
 const router = createRouter({
 	routeTree,
@@ -18,16 +29,6 @@ declare module '@tanstack/react-router' {
 		router: typeof router;
 	}
 }
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			throwOnError: (error, query) => {
-				console.error({query: query.queryHash, error});
-				return false;
-			},
-		},
-	},
-});
 
 const App = () => {
 	return (

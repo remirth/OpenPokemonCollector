@@ -16,6 +16,7 @@ export default defineConfig({
     react(),
   ],
   build: {
+    "outDir": ".output",
     assetsInlineLimit: 0, // avoid inlining huge assets
   },
   optimizeDeps: {

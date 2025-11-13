@@ -100,13 +100,17 @@ export class RepositoryContext {
 		engine ??= await DB.createEngine(name);
 
 		if (import.meta.env.DEV) {
-			await engine.exec(`SET search_path = public;`);
 			// biome-ignore lint/suspicious/noExplicitAny: Running in dev mode make the database accessible from devtools
 			(window as any).db = engine;
 		}
 
 		const ctx = DB.createDbContext(engine);
-		DB.migrateDatabase(ctx);
+		const shouldMigrate = DB.shouldMigrate();
+
+		if (shouldMigrate) {
+			await DB.migrateDatabase(ctx);
+			DB.updatePerformedMigrations();
+		}
 
 		const instance = new RepositoryContext(ctx, engine, DB.tables);
 		return instance;
