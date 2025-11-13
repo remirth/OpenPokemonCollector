@@ -1,9 +1,36 @@
 {
+  "$schema": "https://www.schemastore.org/tsconfig",
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "skipLibCheck": true
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "skipDefaultLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowJs": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "types": [
+      "@proj-airi/unplugin-drizzle-orm-migrations/types",
+      "vite/client"
+    ],
+    "isolatedModules": true,
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "@ui/*": [
+        "./src/components/ui/"
+      ]
+    }
   }
 }

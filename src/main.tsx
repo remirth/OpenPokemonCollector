@@ -1,26 +1,47 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
-import './styles.css'
+import {createRouter, RouterProvider} from '@tanstack/react-router';
+import ReactDOM from 'react-dom/client';
+import {routeTree} from './routeTree.gen';
+import './styles.css';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {NotInitializedError} from './lib/errors';
 
 // Set up a Router instance
 const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-})
+	routeTree,
+	defaultPreload: 'intent',
+	scrollRestoration: true,
+});
 
 // Register things for typesafety
 declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
+	interface Register {
+		router: typeof router;
+	}
 }
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			throwOnError: (error, query) => {
+				console.error({query: query.queryHash, error});
+				return false;
+			},
+		},
+	},
+});
 
-const rootElement = document.getElementById('app')!
+const App = () => {
+	return (
+		<QueryClientProvider client={queryClient}>
+			<RouterProvider router={router} />
+		</QueryClientProvider>
+	);
+};
+
+const rootElement = document.getElementById('app');
+
+NotInitializedError.assert('RootElement', rootElement);
 
 if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(<RouterProvider router={router} />)
+	const root = ReactDOM.createRoot(rootElement);
+	root.render(<App />);
 }
