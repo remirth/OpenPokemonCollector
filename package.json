@@ -2,6 +2,7 @@
   "name": "tanstack-router-react-example-quickstart-file-based",
   "private": true,
   "type": "module",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite --port 3000",
     "build": "vite build",
