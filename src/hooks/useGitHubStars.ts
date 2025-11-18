@@ -1,7 +1,6 @@
-import {type} from 'arktype';
 import {useQuery} from '@tanstack/react-query';
+import {type} from 'arktype';
 import {http} from '~/lib/http';
-import {useEffect} from 'react';
 
 const GitHubRepo = type({
 	stargazers_count: 'number',
@@ -21,17 +20,7 @@ export function useGitHubStars() {
 			return data.stargazers_count;
 		},
 		staleTime: 1000 * 60 * 5, // 5 minutes
-		initialData: () => {
-			const cached = localStorage.getItem(key);
-			return cached ? parseInt(cached, 10) : undefined;
-		},
 	});
-
-	useEffect(() => {
-		if (query.data) {
-			localStorage.setItem(key, query.data.toString());
-		}
-	}, [query.data]);
 
 	return query;
 }

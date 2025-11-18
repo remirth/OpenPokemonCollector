@@ -1,15 +1,15 @@
-import {Star} from 'lucide-react';
 import {Link} from '@tanstack/react-router';
+import {Star} from 'lucide-react';
 import pkg from '~/../package.json';
+import {Button} from '~/components/ui/button';
 import {
 	NavigationMenu,
 	NavigationMenuItem,
 	NavigationMenuList,
 } from '~/components/ui/navigation-menu';
-import {Button} from '~/components/ui/button';
-import {PokemonIcon, GithubIcon} from './Icons';
-import {ToggleMode} from './ToggleMode';
 import {useGitHubStars} from '~/hooks/useGitHubStars';
+import {GithubIcon, PokemonIcon} from './Icons';
+import {ToggleMode} from './ToggleMode';
 
 export function Header() {
 	const {data: stars, isLoading} = useGitHubStars();
