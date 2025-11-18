@@ -4,7 +4,7 @@ import {routeTree} from './routeTree.gen';
 import './styles.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {NotInitializedError} from './lib/errors';
-
+import {ThemeProvider} from './contexts/theme';
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -33,7 +33,9 @@ declare module '@tanstack/react-router' {
 const App = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<RouterProvider router={router} />
+			<ThemeProvider storageKey='__theme' defaultTheme='system'>
+				<RouterProvider router={router} />
+			</ThemeProvider>
 		</QueryClientProvider>
 	);
 };
