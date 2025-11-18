@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom/client';
 import {routeTree} from './routeTree.gen';
 import './styles.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {ModeProvider} from './contexts/mode';
 import {NotInitializedError} from './lib/errors';
-import {ThemeProvider} from './contexts/theme';
+
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -33,9 +34,9 @@ declare module '@tanstack/react-router' {
 const App = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ThemeProvider storageKey='__theme' defaultTheme='system'>
+			<ModeProvider storageKey='__theme' defaultMode='system'>
 				<RouterProvider router={router} />
-			</ThemeProvider>
+			</ModeProvider>
 		</QueryClientProvider>
 	);
 };

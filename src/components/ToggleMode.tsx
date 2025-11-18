@@ -7,10 +7,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import {useTheme} from '~/contexts/theme';
+import {MODES, useMode} from '~/contexts/mode';
 
-export function ThemeToggle() {
-	const {setTheme} = useTheme();
+export function ToggleMode() {
+	const {setMode} = useMode();
 
 	return (
 		<DropdownMenu>
@@ -22,25 +22,18 @@ export function ThemeToggle() {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end' className='bg-secondary-background'>
-				<DropdownMenuItem
-					className='bg-secondary-background text-black dark:text-white'
-					onClick={() => setTheme('light')}
-				>
-					Light
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					className='bg-secondary-background text-black dark:text-white'
-					onClick={() => setTheme('dark')}
-				>
-					Dark
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					className='bg-secondary-background text-black dark:text-white'
-					onClick={() => setTheme('system')}
-				>
-					System
-				</DropdownMenuItem>
+				{MODES.map((mode) => (
+					<DropdownMenuItem
+						key={mode.value}
+						className='bg-secondary-background text-black dark:text-white'
+						onClick={() => setMode(mode.value)}
+					>
+						{mode.name}
+					</DropdownMenuItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 }
+
+ToggleMode.displayName = 'ToggleMode';
