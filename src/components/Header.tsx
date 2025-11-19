@@ -15,10 +15,10 @@ export function Header() {
 	const {data: stars, isLoading} = useGitHubStars();
 
 	return (
-		<NavigationMenu className='z-5 h-[70px] bg-secondary-background'>
+		<NavigationMenu className='z-5 h-[70px] bg-secondary-background rounded-none'>
 			<NavigationMenuList className='w-screen justify-between px-6'>
 				<NavigationMenuItem className='flex items-center space-x-4'>
-					<Button variant='neutral' size='icon' asChild>
+					<Button variant='default' size='icon' asChild>
 						<Link to='/' aria-label='Home'>
 							<PokemonIcon />
 						</Link>
