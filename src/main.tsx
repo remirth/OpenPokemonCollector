@@ -4,6 +4,7 @@ import {routeTree} from './routeTree.gen';
 import './styles.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {ModeProvider} from './contexts/mode';
+import {StyleProvider} from './contexts/style';
 import {NotInitializedError} from './lib/errors';
 
 const queryClient = new QueryClient({
@@ -34,9 +35,11 @@ declare module '@tanstack/react-router' {
 const App = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ModeProvider storageKey='__theme' defaultMode='system'>
-				<RouterProvider router={router} />
-			</ModeProvider>
+			<StyleProvider storageKey='__style' defaultStyle='default'>
+				<ModeProvider storageKey='__theme' defaultMode='system'>
+					<RouterProvider router={router} />
+				</ModeProvider>
+			</StyleProvider>
 		</QueryClientProvider>
 	);
 };

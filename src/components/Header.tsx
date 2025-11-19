@@ -8,8 +8,9 @@ import {
 	NavigationMenuList,
 } from '~/components/ui/navigation-menu';
 import {useGitHubStars} from '~/hooks/useGitHubStars';
-import {GithubIcon, PokemonIcon} from './Icons';
+import {GithubIcon, PokeballIcon} from './Icons';
 import {ToggleMode} from './ToggleMode';
+import {ToggleStyle} from './ToggleStyle';
 
 export function Header() {
 	const {data: stars, isLoading} = useGitHubStars();
@@ -18,9 +19,9 @@ export function Header() {
 		<NavigationMenu className='z-5 h-[70px] bg-secondary-background rounded-none'>
 			<NavigationMenuList className='w-screen justify-between px-6'>
 				<NavigationMenuItem className='flex items-center space-x-4'>
-					<Button variant='default' size='icon' asChild>
+					<Button variant='noShadow' size='icon' asChild>
 						<Link to='/' aria-label='Home'>
-							<PokemonIcon />
+							<PokeballIcon />
 						</Link>
 					</Button>
 					<span className='text-sm text-muted-foreground'>v{pkg.version}</span>
@@ -46,6 +47,7 @@ export function Header() {
 							</div>
 						</a>
 					</Button>
+					<ToggleStyle />
 					<ToggleMode />
 				</NavigationMenuItem>
 			</NavigationMenuList>
