@@ -27,7 +27,7 @@ export class EntityRepository extends BaseRepository {
 			.then((row) => row.id);
 	};
 
-	readonly createUniqueByName = async (
+	readonly createUniqueBySlug = async (
 		payload: InsertEntity,
 		trx = this.db,
 	) => {
@@ -35,9 +35,9 @@ export class EntityRepository extends BaseRepository {
 			.insert(this.tbl)
 			.values(payload)
 			.onConflictDoUpdate({
-				target: this.tbl.name,
+				target: this.tbl.slug,
 				set: {
-					name: this.$.sql`${this.tbl.name}`,
+					slug: this.$.sql`${this.tbl.slug}`,
 				},
 			})
 			.returning({id: this.tbl.id})

@@ -17,6 +17,7 @@ export const entityTable = SQL.pgTable(
 	{
 		id: SQL.integer('id').primaryKey().generatedAlwaysAsIdentity(),
 		name: SQL.varchar('name', {length: 255}).notNull().unique(),
+		slug: SQL.varchar('slug', {length: 255}).notNull().unique(),
 		evolvesFrom: SQL.varchar('evolves_from', {length: 255}),
 		evolvesTo: SQL.text('evolves_to').array(),
 		entityKind: entityKindEnum('entity_kind').notNull(),
@@ -30,6 +31,7 @@ export const entityTable = SQL.pgTable(
 	(tbl) => {
 		return [
 			SQL.uniqueIndex('entity_name_idx').on(tbl.name),
+			SQL.uniqueIndex('entity_slug_idx').on(tbl.slug),
 			SQL.uniqueIndex('entity_pokedex_idx').on(tbl.pokedexNumber),
 			SQL.uniqueIndex('entity_pokedex_name_idx').on(
 				tbl.pokedexNumber,

@@ -1,3 +1,4 @@
+import {kebabCase} from 'change-case';
 import {Chan} from 'ts-chan';
 import type {DB} from '~/db';
 import {
@@ -7,6 +8,7 @@ import {
 	toError,
 } from '../src/lib/errors';
 import type {RepositoryContext} from '../src/repositories';
+import {cleanCardName} from './lib';
 import {Pokedex} from './pokedex';
 import {
 	type CardFile,
@@ -125,6 +127,7 @@ async function importSet(
 						{
 							entityKind,
 							name,
+							slug: encodeURI(kebabCase(name)),
 							pokedexNumber,
 							imageUrl: `${basePokedexImageUrl}${pokedexNumber}.png`,
 							evolvesFrom: card.evolvesFrom,
@@ -135,11 +138,13 @@ async function importSet(
 					.then((id) => entityIds.push(id));
 			}
 		} else {
+			const name = cleanCardName(card.name);
 			await ctx.entities
-				.createUniqueByName(
+				.createUniqueBySlug(
 					{
 						entityKind,
-						name: card.name,
+						name,
+						slug: encodeURI(kebabCase(name)),
 						evolvesFrom: card.evolvesFrom,
 						evolvesTo: card.evolvesTo,
 					},

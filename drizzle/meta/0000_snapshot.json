@@ -1,5 +1,5 @@
 {
-	"id": "adc31dbc-f0d4-491a-8dda-26194cdc2933",
+	"id": "5182621f-aee8-4ab9-a8a6-0e1a56830dc8",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -612,6 +612,12 @@
 					"primaryKey": false,
 					"notNull": true
 				},
+				"slug": {
+					"name": "slug",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
 				"evolves_from": {
 					"name": "evolves_from",
 					"type": "varchar(255)",
@@ -660,6 +666,21 @@
 					"columns": [
 						{
 							"expression": "name",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"entity_slug_idx": {
+					"name": "entity_slug_idx",
+					"columns": [
+						{
+							"expression": "slug",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -744,6 +765,11 @@
 					"name": "entities_name_unique",
 					"nullsNotDistinct": false,
 					"columns": ["name"]
+				},
+				"entities_slug_unique": {
+					"name": "entities_slug_unique",
+					"nullsNotDistinct": false,
+					"columns": ["slug"]
 				},
 				"entities_pokedex_number_unique": {
 					"name": "entities_pokedex_number_unique",

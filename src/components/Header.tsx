@@ -16,7 +16,7 @@ export function Header() {
 	const {data: stars, isLoading} = useGitHubStars();
 
 	return (
-		<NavigationMenu className='z-5 h-[70px] bg-secondary-background rounded-none'>
+		<NavigationMenu className='z-5 h-[70px] bg-secondary-background rounded-none fixed'>
 			<NavigationMenuList className='w-screen justify-between px-6'>
 				<NavigationMenuItem className='flex items-center space-x-4'>
 					<Button variant='noShadow' size='icon' asChild>
