@@ -1,5 +1,5 @@
 import type {Type} from 'arktype';
-import {type Dispatch, type SetStateAction, useCallback, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {NotInitializedError} from '~/lib/errors';
 
 function resolve<T>(v: T | (() => T)): T {
@@ -10,6 +10,7 @@ export function usePersistedState<T>(
 	key: string,
 	schema: Type<T>,
 	initial: T | (() => T),
+	onChange?: (v: T) => void,
 ) {
 	const [value, set] = useState<T>(() => {
 		try {
@@ -24,13 +25,10 @@ export function usePersistedState<T>(
 		}
 	});
 
-	const setter: Dispatch<SetStateAction<T>> = useCallback(
-		(v) => {
-			set(v);
-			localStorage.setItem(key, JSON.stringify(v));
-		},
-		[key],
-	);
+	useEffect(() => {
+		localStorage.setItem(key, JSON.stringify(value));
+		onChange?.(value);
+	}, [value, onChange, key]);
 
-	return [value, setter] as const;
+	return [value, set] as const;
 }
