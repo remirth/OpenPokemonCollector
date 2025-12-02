@@ -22,6 +22,7 @@ const queryClient = new QueryClient({
 const router = createRouter({
 	routeTree,
 	defaultPreload: 'intent',
+	defaultViewTransition: true,
 	scrollRestoration: true,
 });
 

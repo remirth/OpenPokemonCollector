@@ -8,15 +8,21 @@ import {
 	NavigationMenuList,
 } from '~/components/ui/navigation-menu';
 import {useGitHubStars} from '~/hooks/useGitHubStars';
+import {cn} from '~/lib/utils';
 import {GithubIcon, PokeballIcon} from './Icons';
 import {ToggleMode} from './ToggleMode';
 import {ToggleStyle} from './ToggleStyle';
 
-export function Header() {
+export function Header({className}: {className?: string}) {
 	const {data: stars, isLoading} = useGitHubStars();
 
 	return (
-		<NavigationMenu className='z-5 h-[70px] bg-secondary-background rounded-none fixed'>
+		<NavigationMenu
+			className={cn(
+				'z-5 h-full w-full bg-secondary-background rounded-none',
+				className,
+			)}
+		>
 			<NavigationMenuList className='w-screen justify-between px-6'>
 				<NavigationMenuItem className='flex items-center space-x-4'>
 					<Button variant='noShadow' size='icon' asChild>
