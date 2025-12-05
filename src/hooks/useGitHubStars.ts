@@ -7,9 +7,10 @@ const GitHubRepo = type({
 });
 
 const key = 'github-stars';
-export function useGitHubStars() {
+export function useGitHubStars(enabled = true) {
 	const query = useQuery({
 		queryKey: [key],
+		enabled,
 		queryFn: async () => {
 			const data = await http(
 				'https://api.github.com/repos/remirth/OpenPokemonCollector',

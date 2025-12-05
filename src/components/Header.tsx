@@ -7,6 +7,7 @@ import {
 	NavigationMenuItem,
 	NavigationMenuList,
 } from '~/components/ui/navigation-menu';
+import {useIsMobile} from '~/hooks/use-mobile';
 import {useGitHubStars} from '~/hooks/useGitHubStars';
 import {cn} from '~/lib/utils';
 import {GithubIcon, PokeballIcon} from './Icons';
@@ -14,7 +15,8 @@ import {ToggleMode} from './ToggleMode';
 import {ToggleStyle} from './ToggleStyle';
 
 export function Header({className}: {className?: string}) {
-	const {data: stars, isLoading} = useGitHubStars();
+	const isMobile = useIsMobile();
+	const {data: stars, isLoading} = useGitHubStars(!isMobile);
 
 	return (
 		<NavigationMenu
@@ -30,10 +32,12 @@ export function Header({className}: {className?: string}) {
 							<PokeballIcon />
 						</Link>
 					</Button>
-					<span className='text-sm text-muted-foreground'>v{pkg.version}</span>
+					<span className='text-sm text-muted-foreground sm:block hidden'>
+						v{pkg.version}
+					</span>
 				</NavigationMenuItem>
 				<NavigationMenuItem className='flex items-center space-x-4'>
-					<span className='text-sm text-muted-foreground'>
+					<span className='text-sm text-muted-foreground md:block hidden'>
 						Track Your Personal Pokémon Collection
 					</span>
 					<Button variant='neutral' asChild>
@@ -42,10 +46,10 @@ export function Header({className}: {className?: string}) {
 							target='_blank'
 							rel='noopener noreferrer'
 							aria-label='GitHub Repository'
-							className='flex items-center justify-center gap-2'
+							className='flex items-center justify-center md:gap-2 px-3! md:px-4 py-2'
 						>
 							<GithubIcon className='size-4' />
-							<div className='flex items-center justify-center gap-0.5'>
+							<div className='items-center justify-center gap-0.5 hidden md:flex'>
 								<span className='text-xs font-medium leading-none'>
 									{isLoading ? '...' : stars ? stars.toLocaleString() : '0'}
 								</span>
