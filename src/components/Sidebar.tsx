@@ -1,36 +1,6 @@
 import {Link} from '@tanstack/react-router';
-import {Home, type LucideIcon} from 'lucide-react';
 import {cn} from '~/lib/utils';
-
-type SidebarLink = {
-	icon?: LucideIcon;
-	id: string;
-	text: string;
-	props?: Parameters<typeof Link>[0];
-};
-
-const SIDEBAR_LINKS = [
-	{
-		id: 'sidebar_header',
-		text: 'Collector',
-	},
-	{
-		id: 'sidebar_pokedex_link',
-		text: 'Pokedex',
-		icon: Home,
-		props: {
-			to: '/',
-		},
-	},
-	{
-		id: 'sidebar_cards_link',
-		text: 'Cards',
-		icon: Home,
-		props: {
-			to: '/cards/',
-		},
-	},
-] satisfies Array<SidebarLink>;
+import {NAVIGATION_LINKS} from './constants/navigation';
 
 export function AppSidebar({className}: {className?: string}) {
 	return (
@@ -40,7 +10,7 @@ export function AppSidebar({className}: {className?: string}) {
 				className,
 			)}
 		>
-			{SIDEBAR_LINKS.map((item) => {
+			{NAVIGATION_LINKS.map((item) => {
 				return item?.props == null ? (
 					<div
 						key={item.id}
