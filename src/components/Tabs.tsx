@@ -6,7 +6,7 @@ export function AppTabs({className}: {className?: string}) {
 	return (
 		<nav
 			className={cn(
-				'fixed bottom-0 left-0 right-0 z-50 bg-secondary-background border-t-4 border-border',
+				'z-50 bg-secondary-background border-t-4 border-border',
 				className,
 			)}
 		>
