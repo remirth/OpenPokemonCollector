@@ -32,7 +32,7 @@ export function Header({className}: {className?: string}) {
 							<PokeballIcon />
 						</Link>
 					</Button>
-					<span className='text-sm text-muted-foreground sm:block hidden'>
+					<span className='text-sm text-muted-foreground xs:block hidden'>
 						v{pkg.version}
 					</span>
 				</NavigationMenuItem>
@@ -46,7 +46,7 @@ export function Header({className}: {className?: string}) {
 							target='_blank'
 							rel='noopener noreferrer'
 							aria-label='GitHub Repository'
-							className='flex items-center justify-center md:gap-2 px-3! md:px-4 py-2'
+							className='xxs:flex! hidden! items-center justify-center md:gap-2 px-3! md:px-4 py-2 '
 						>
 							<GithubIcon className='size-4' />
 							<div className='items-center justify-center gap-0.5 hidden md:flex'>

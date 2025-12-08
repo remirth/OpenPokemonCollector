@@ -215,3 +215,8 @@ html.dark body::-webkit-scrollbar-thumb {
     scrollbar-color: #000 transparent;
   }
 }
+
+@theme inline {
+  --breakpoint-xs: 480px;
+  --breakpoint-xxs: 360px;
+}
