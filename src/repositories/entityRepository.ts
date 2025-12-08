@@ -52,7 +52,7 @@ export class EntityRepository extends BaseRepository {
 		page = 0,
 		pageSize = 50,
 		trx = this.db,
-	): Promise<Array<SelectEntity>> => {
+	): Promise<Array<SelectEntity & {id: number}>> => {
 		return trx
 			.select()
 			.from(this.tbl)
