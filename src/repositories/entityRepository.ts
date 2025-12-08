@@ -1,13 +1,16 @@
-import type {InsertEntity} from '~/db/schema';
+import type {InsertEntity, SelectEntity} from '~/db/schema';
 import {NotInitializedError} from '~/lib/errors';
 import {BaseRepository} from './baseRepository';
 
 export class EntityRepository extends BaseRepository {
 	private tbl = this.tables.entityTable;
 
-	readonly createUnique = async (payload: InsertEntity, trx = this.db) => {
+	readonly createUnique = async (
+		payload: InsertEntity,
+		trx = this.db,
+	): Promise<number> => {
 		if (payload.entityKind !== 'pokemon')
-			return this.createUniqueByName(payload, trx);
+			return this.createUniqueBySlug(payload, trx);
 		NotInitializedError.assert(
 			`PokedexNumber for ${payload.name}`,
 			payload.pokedexNumber,
@@ -30,7 +33,7 @@ export class EntityRepository extends BaseRepository {
 	readonly createUniqueBySlug = async (
 		payload: InsertEntity,
 		trx = this.db,
-	) => {
+	): Promise<number> => {
 		return trx
 			.insert(this.tbl)
 			.values(payload)
@@ -43,5 +46,18 @@ export class EntityRepository extends BaseRepository {
 			.returning({id: this.tbl.id})
 			.then(this.assertFirst(payload.name))
 			.then((row) => row.id);
+	};
+
+	readonly getPage = (
+		page = 0,
+		pageSize = 50,
+		trx = this.db,
+	): Promise<Array<SelectEntity>> => {
+		return trx
+			.select()
+			.from(this.tbl)
+			.limit(pageSize)
+			.offset(page * pageSize)
+			.orderBy(this.$.asc(this.tbl.pokedexNumber));
 	};
 }
