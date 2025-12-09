@@ -18,7 +18,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/components/ui/tooltip';
-import {useIsMobile} from '~/hooks/use-mobile';
+import {useIsMobile} from '~/hooks/useMobile';
 import {usePersistedState} from '~/hooks/usePersistedState';
 import {cn} from '~/lib/utils';
 import {boolean} from '~/schemas/shared';

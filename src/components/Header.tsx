@@ -7,8 +7,8 @@ import {
 	NavigationMenuItem,
 	NavigationMenuList,
 } from '~/components/ui/navigation-menu';
-import {useIsMobile} from '~/hooks/use-mobile';
 import {useGitHubStars} from '~/hooks/useGitHubStars';
+import {useIsMobile} from '~/hooks/useMobile';
 import {cn} from '~/lib/utils';
 import {GithubIcon, PokeballIcon} from './Icons';
 import {ToggleMode} from './ToggleMode';

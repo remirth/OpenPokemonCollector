@@ -2,7 +2,9 @@ import {createRouter, RouterProvider} from '@tanstack/react-router';
 import ReactDOM from 'react-dom/client';
 import {routeTree} from './routeTree.gen';
 import './styles.css';
+import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {persistQueryClient} from '@tanstack/react-query-persist-client';
 import {StrictMode} from 'react';
 import {ModeProvider} from './contexts/mode';
 import {StyleProvider} from './contexts/style';
@@ -17,6 +19,14 @@ const queryClient = new QueryClient({
 			},
 		},
 	},
+});
+const persister = createAsyncStoragePersister({
+	storage: window.localStorage,
+});
+
+persistQueryClient({
+	queryClient,
+	persister,
 });
 
 // Set up a Router instance
