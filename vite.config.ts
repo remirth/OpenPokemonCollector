@@ -6,9 +6,14 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import tw from "@tailwindcss/vite";
 import ReactCompiler from "babel-plugin-react-compiler";
 
+const debugBuild = !!process.env["VITE_DEBUG_BUILD"];
+
 // https://vitejs.dev/config/
 export default defineConfig({
   "publicDir": "./public",
+  define: debugBuild ? {
+    "process.env.NODE_ENV": JSON.stringify("development"),
+  } : undefined,
   plugins: [
     unpluginDrizzleOrmMigrations(),
     tw(),
@@ -22,7 +27,7 @@ export default defineConfig({
   ],
   build: {
     "outDir": ".output",
-    assetsInlineLimit: 0, // avoid inlining huge assets
+    minify: debugBuild ? false : undefined,
   },
   optimizeDeps: {
     exclude: ['@electric-sql/pglite'],

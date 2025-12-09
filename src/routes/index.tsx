@@ -15,7 +15,7 @@ import {
 import {Skeleton} from '~/components/ui/skeleton';
 import type {SelectEntity} from '~/db/schema';
 import {Entities} from '~/hooks/useEntities';
-import {useQCFromCtx} from '~/lib/utils';
+import {setLoader, useQCFromCtx} from '~/lib/utils';
 
 const pokedexSearchSchema = type({
 	'page?': 'number.integer',
@@ -32,10 +32,14 @@ export const Route = createFileRoute('/')({
 		const queryClient = useQCFromCtx(ctx);
 		const search = pokedexSearchSchema.assert(ctx.location.search);
 
-		await Entities.load(queryClient, {
-			page: search.page ?? 0,
-			pageSize: search.pageSize ?? 50,
-		});
+		const loader = () =>
+			Entities.load(queryClient, {
+				page: search.page ?? 0,
+				pageSize: search.pageSize ?? 50,
+			});
+
+		setLoader(loader);
+		await loader();
 	},
 });
 
@@ -142,21 +146,19 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 						{displayPage}
 					</PaginationLink>
 				</PaginationItem>
-				<div className='items-center md:flex hidden'>
-					<PaginationItem>
-						<PaginationLink
-							preload='viewport'
-							disabled={!hasMore}
-							to={api.path}
-							search={{...search, page: page + 1} as unknown}
-						>
-							{displayPage + 1}
-						</PaginationLink>
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationEllipsis />
-					</PaginationItem>
-				</div>
+				<PaginationItem className='hidden md:flex items-center'>
+					<PaginationLink
+						preload='viewport'
+						disabled={!hasMore}
+						to={api.path}
+						search={{...search, page: page + 1} as unknown}
+					>
+						{displayPage + 1}
+					</PaginationLink>
+				</PaginationItem>
+				<PaginationItem className='hidden md:flex items-center'>
+					<PaginationEllipsis />
+				</PaginationItem>
 				<PaginationItem>
 					<PaginationNext
 						preload='viewport'

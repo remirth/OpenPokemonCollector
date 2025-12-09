@@ -1,15 +1,13 @@
 import {createRouter, RouterProvider} from '@tanstack/react-router';
-import ReactDOM, {hydrateRoot} from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
 import {routeTree} from './routeTree.gen';
 import './styles.css';
-import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister';
 import {
 	dehydrate,
 	HydrationBoundary,
 	QueryClient,
 	QueryClientProvider,
 } from '@tanstack/react-query';
-import {persistQueryClient} from '@tanstack/react-query-persist-client';
 import {StrictMode} from 'react';
 import {ModeProvider} from './contexts/mode';
 import {StyleProvider} from './contexts/style';
@@ -33,19 +31,8 @@ const queryClient = new QueryClient({
 	},
 });
 
-if (location.search.includes('prerender')) {
-	// biome-ignore lint/suspicious/noExplicitAny: We need to expose the queryClient to the prerender
-	(window as any).dehydrate = dehydrate(queryClient);
-}
-
-const persister = createAsyncStoragePersister({
-	storage: window.localStorage,
-});
-
-persistQueryClient({
-	queryClient,
-	persister,
-});
+// biome-ignore lint/suspicious/noExplicitAny: We need to expose the queryClient to the prerender
+(window as any).__rqDehydrate = () => JSON.stringify(dehydrate(queryClient));
 
 // Set up a Router instance
 const router = createRouter({
@@ -85,9 +72,5 @@ const App = () => {
 const rootElement = document.getElementById('app');
 NotInitializedError.assert('RootElement', rootElement);
 
-if (rootElement.hasChildNodes()) {
-	hydrateRoot(rootElement, <App />);
-} else {
-	const root = ReactDOM.createRoot(rootElement);
-	root.render(<App />);
-}
+const root = ReactDOM.createRoot(rootElement);
+root.render(<App />);

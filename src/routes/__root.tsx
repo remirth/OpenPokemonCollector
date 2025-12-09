@@ -7,6 +7,7 @@ import {AppTabs} from '~/components/Tabs';
 
 export const Route = createRootRoute({
 	component: RootComponent,
+	ssr: true,
 });
 
 function RootComponent() {

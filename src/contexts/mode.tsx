@@ -28,14 +28,20 @@ const ModeProviderContext = createContext<ModeProviderState>(initialState);
 
 export function ModeProvider({
 	children,
-	defaultMode = 'system',
+	defaultMode = 'dark',
 	storageKey = '__current_mode',
 	...props
 }: ModeProviderProps) {
-	const [theme, setMode] = useState<Mode>(() => {
+	const [theme, setMode] = useState<Mode>(defaultMode);
+
+	useEffect(() => {
 		const stored = localStorage.getItem(storageKey);
-		return MODES.find((m) => m.value === stored)?.value ?? defaultMode;
-	});
+		const mode = MODES.find((m) => m.value === stored)?.value;
+
+		if (mode) {
+			setMode(mode);
+		}
+	}, [storageKey]);
 
 	const systemIsDark = usePrefersDark();
 

@@ -21,7 +21,8 @@
     "baseUrl": ".",
     "types": [
       "@proj-airi/unplugin-drizzle-orm-migrations/types",
-      "vite/client"
+      "vite/client",
+      "@types/bun"
     ],
     "isolatedModules": true,
     "paths": {

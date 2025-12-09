@@ -10,6 +10,7 @@ import {
 import {useGitHubStars} from '~/hooks/useGitHubStars';
 import {useIsMobile} from '~/hooks/useMobile';
 import {cn} from '~/lib/utils';
+import {ClientOnly} from './ClientOnly';
 import {GithubIcon, PokeballIcon} from './Icons';
 import {ToggleMode} from './ToggleMode';
 import {ToggleStyle} from './ToggleStyle';
@@ -57,8 +58,12 @@ export function Header({className}: {className?: string}) {
 							</div>
 						</a>
 					</Button>
-					<ToggleStyle />
-					<ToggleMode />
+					<ClientOnly>
+						<ToggleStyle />
+					</ClientOnly>
+					<ClientOnly>
+						<ToggleMode />
+					</ClientOnly>
 				</NavigationMenuItem>
 			</NavigationMenuList>
 		</NavigationMenu>

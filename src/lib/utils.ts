@@ -10,3 +10,8 @@ export function cn(...inputs: ClassValue[]) {
 export function useQCFromCtx(ctx: any) {
 	return ctx.context.queryClient as QueryClient;
 }
+
+export function setLoader(loader: () => Promise<unknown>) {
+	// biome-ignore lint/suspicious/noExplicitAny: We need to cast here
+	(window as any).load = loader;
+}
