@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import {routeTree} from './routeTree.gen';
 import './styles.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {StrictMode} from 'react';
 import {ModeProvider} from './contexts/mode';
 import {StyleProvider} from './contexts/style';
 import {NotInitializedError} from './lib/errors';
@@ -35,13 +36,15 @@ declare module '@tanstack/react-router' {
 
 const App = () => {
 	return (
-		<QueryClientProvider client={queryClient}>
-			<StyleProvider storageKey='__style' defaultStyle='default'>
-				<ModeProvider storageKey='__theme' defaultMode='system'>
-					<RouterProvider router={router} />
-				</ModeProvider>
-			</StyleProvider>
-		</QueryClientProvider>
+		<StrictMode>
+			<QueryClientProvider client={queryClient}>
+				<StyleProvider storageKey='__style' defaultStyle='default'>
+					<ModeProvider storageKey='__theme' defaultMode='system'>
+						<RouterProvider router={router} />
+					</ModeProvider>
+				</StyleProvider>
+			</QueryClientProvider>
+		</StrictMode>
 	);
 };
 

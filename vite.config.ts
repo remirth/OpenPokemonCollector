@@ -4,6 +4,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import unpluginDrizzleOrmMigrations from "@proj-airi/unplugin-drizzle-orm-migrations/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import tw from "@tailwindcss/vite";
+import ReactCompiler from "babel-plugin-react-compiler";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,7 +14,11 @@ export default defineConfig({
     tw(),
     tsConfigPaths(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
-    react(),
+    react({
+      "babel": {
+        "plugins": [ReactCompiler]
+      }
+    }),
   ],
   build: {
     "outDir": ".output",
