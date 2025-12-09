@@ -40,7 +40,7 @@ const App = () => {
 			<QueryClientProvider client={queryClient}>
 				<StyleProvider storageKey='__style' defaultStyle='default'>
 					<ModeProvider storageKey='__theme' defaultMode='system'>
-						<RouterProvider router={router} />
+						<RouterProvider router={router} context={{queryClient}} />
 					</ModeProvider>
 				</StyleProvider>
 			</QueryClientProvider>

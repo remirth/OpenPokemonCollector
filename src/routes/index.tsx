@@ -14,22 +14,29 @@ import {
 } from '~/components/ui/pagination';
 import {Skeleton} from '~/components/ui/skeleton';
 import type {SelectEntity} from '~/db/schema';
-import {useEntities, useEntityImage} from '~/hooks/useEntities';
+import {Entities} from '~/hooks/useEntities';
+import {useQCFromCtx} from '~/lib/utils';
 
 const pokedexSearchSchema = type({
 	'page?': 'number.integer',
 	'pageSize?': 'number.integer',
 });
 
-type PokedexSearch = {
-	page?: number;
-	pageSize?: number;
-};
+type PokedexSearch = typeof pokedexSearchSchema.infer;
 
 export const Route = createFileRoute('/')({
 	component: HomeComponent,
 	validateSearch: (s: PokedexSearch): PokedexSearch =>
 		pokedexSearchSchema.assert(s),
+	loader: async (ctx) => {
+		const queryClient = useQCFromCtx(ctx);
+		const search = pokedexSearchSchema.assert(ctx.location.search);
+
+		await Entities.load(queryClient, {
+			page: search.page ?? 0,
+			pageSize: search.pageSize ?? 50,
+		});
+	},
 });
 
 const api = Route;
@@ -38,7 +45,10 @@ function HomeComponent() {
 	const search = api.useSearch();
 
 	const pageSize = search.pageSize ?? 50;
-	const state = useEntities(search.page, pageSize);
+	const state = Entities.useEntities({
+		page: search.page ?? 0,
+		pageSize,
+	});
 
 	const items = useMemo(
 		() => Array.from({length: state.data?.length ?? pageSize}).fill(0),
@@ -67,11 +77,10 @@ type EntityProps = {
 	isLoading: boolean;
 };
 function EntityCard({entity, isLoading}: EntityProps) {
-	const image = useEntityImage(
-		isLoading,
-		entity?.id,
-		entity?.imageUrl ?? undefined,
-	);
+	const image = Entities.useEntityImage({
+		id: entity?.id,
+		imageUrl: entity?.imageUrl,
+	});
 
 	return (
 		<ImageCard
