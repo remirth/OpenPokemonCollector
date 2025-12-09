@@ -2,7 +2,7 @@ import type {InsertSet} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class SetRepository extends BaseRepository {
-	private tbl = this.tables.setTable;
+	private tbl = this.T.setTable;
 	readonly createUnique = async (set: InsertSet, trx = this.db) => {
 		return trx
 			.insert(this.tbl)

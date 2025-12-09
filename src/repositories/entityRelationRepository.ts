@@ -2,7 +2,7 @@ import type {InsertEntityRelation} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class EntityRelationRepository extends BaseRepository {
-	private tbl = this.tables.entityRelationTable;
+	private tbl = this.T.entityRelationTable;
 
 	readonly createUnique = async (
 		payload: InsertEntityRelation,

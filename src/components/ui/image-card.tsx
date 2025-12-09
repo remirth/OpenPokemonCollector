@@ -1,13 +1,22 @@
+import type * as React from 'react';
 import {cn} from '~/lib/utils';
+import {Skeleton} from './skeleton';
 
 type Props = {
 	imageUrl: string;
-	caption: string;
+	caption: React.ReactNode;
 	className?: string;
+	isLoading?: boolean;
 	alt: string;
 };
 
-export default function ImageCard({imageUrl, alt, caption, className}: Props) {
+export default function ImageCard({
+	imageUrl,
+	isLoading,
+	alt,
+	caption,
+	className,
+}: Props) {
 	return (
 		<figure
 			className={cn(
@@ -15,8 +24,18 @@ export default function ImageCard({imageUrl, alt, caption, className}: Props) {
 				className,
 			)}
 		>
-			<img className='w-full aspect-4/3' src={imageUrl} alt={alt} />
-			<figcaption className='border-t-2 text-main-foreground border-border p-4'>
+			{isLoading ? (
+				<Skeleton className='w-full aspect-4/3' />
+			) : (
+				<img
+					className='w-full aspect-4/3'
+					src={imageUrl}
+					alt={alt}
+					decoding='async'
+					loading='lazy'
+				/>
+			)}
+			<figcaption className='border-t-2 text-main-foreground bg-secondary-background border-border p-4 h-full'>
 				{caption}
 			</figcaption>
 		</figure>

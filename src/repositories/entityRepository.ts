@@ -3,7 +3,9 @@ import {NotInitializedError} from '~/lib/errors';
 import {BaseRepository} from './baseRepository';
 
 export class EntityRepository extends BaseRepository {
-	private tbl = this.tables.entityTable;
+	private readonly tbl = this.T.entityTable;
+	private readonly relations = this.T.entityRelationTable;
+	private readonly cards = this.T.cardTable;
 
 	readonly createUnique = async (
 		payload: InsertEntity,
@@ -59,5 +61,27 @@ export class EntityRepository extends BaseRepository {
 			.limit(pageSize)
 			.offset(page * pageSize)
 			.orderBy(this.$.asc(this.tbl.pokedexNumber));
+	};
+
+	readonly getCardImageForEntity = (entityId: number, trx = this.db) => {
+		return trx
+			.select({image: this.cards.imageLargeUrl})
+			.from(this.tbl)
+			.leftJoin(this.relations, this.$.eq(this.tbl.id, this.relations.entityId))
+			.leftJoin(this.cards, this.$.eq(this.cards.id, this.relations.cardId))
+			.where(
+				this.$.and(
+					this.$.eq(this.tbl.id, entityId),
+					this.$.isNotNull(this.cards.imageLargeUrl),
+				),
+			)
+			.limit(1)
+			.then(
+				this.R.piped(
+					this.assertFirst(`Card Image for entityId: ${entityId}`),
+					this.R.prop('image'),
+					this.assert(`Card image for entityId: ${entityId}`),
+				),
+			);
 	};
 }

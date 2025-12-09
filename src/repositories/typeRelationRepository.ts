@@ -2,7 +2,7 @@ import type {InsertTypeRelation} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class TypeRelationRepository extends BaseRepository {
-	private tbl = this.tables.typesRelationTable;
+	private tbl = this.T.typesRelationTable;
 	readonly createUnique = async (
 		payload: InsertTypeRelation,
 		trx = this.db,

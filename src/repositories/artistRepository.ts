@@ -2,7 +2,7 @@ import type {InsertArtist} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class ArtistRepository extends BaseRepository {
-	private tbl = this.tables.artistTable;
+	private tbl = this.T.artistTable;
 
 	readonly createUnique = async (payload: InsertArtist, trx = this.db) => {
 		return trx

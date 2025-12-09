@@ -2,7 +2,7 @@ import type {InsertTypes} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class TypeRepository extends BaseRepository {
-	protected tbl = this.tables.typesTable;
+	protected tbl = this.T.typesTable;
 	readonly createUnique = async (payload: InsertTypes, trx = this.db) => {
 		return trx
 			.insert(this.tbl)

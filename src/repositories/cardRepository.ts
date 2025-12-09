@@ -2,7 +2,7 @@ import type {InsertCard} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class CardRepository extends BaseRepository {
-	private tbl = this.tables.cardTable;
+	private tbl = this.T.cardTable;
 
 	readonly createUnique = async (payload: InsertCard, trx = this.db) => {
 		return trx

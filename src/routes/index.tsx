@@ -1,5 +1,7 @@
 import {createFileRoute} from '@tanstack/react-router';
 import {type} from 'arktype';
+import {pascalCase} from 'change-case';
+import {useMemo} from 'react';
 import ImageCard from '~/components/ui/image-card';
 import {
 	Pagination,
@@ -10,7 +12,9 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from '~/components/ui/pagination';
-import {useEntities} from '~/hooks/useEntities';
+import {Skeleton} from '~/components/ui/skeleton';
+import type {SelectEntity} from '~/db/schema';
+import {useEntities, useEntityImage} from '~/hooks/useEntities';
 
 const pokedexSearchSchema = type({
 	'page?': 'number.integer',
@@ -34,22 +38,62 @@ function HomeComponent() {
 	const search = api.useSearch();
 
 	const pageSize = search.pageSize ?? 50;
+	const state = useEntities(search.page, pageSize);
 
-	const state = useEntities(search.page, 50);
+	const items = useMemo(
+		() => Array.from({length: state.data?.length ?? pageSize}).fill(0),
+		[state.data?.length, pageSize],
+	);
 
 	return (
 		<div className='flex flex-row flex-wrap gap-2 align-middle w-full h-fit p-4 pb-16'>
 			<PokedexPagination hasMore={(state.data?.length ?? 0) >= pageSize} />
-			{state.data?.map((ent) => (
-				<ImageCard
-					key={ent.id}
-					imageUrl={ent.imageUrl ?? ''}
-					alt={ent.name}
-					caption={`${ent.pokedexNumber}: ${ent.name}`}
-					className='max-w-40'
-				/>
-			))}
+			{items.map((_, i) => {
+				return (
+					<EntityCard
+						key={state.data?.[i]?.id ?? i}
+						entity={state.data?.[i]}
+						isLoading={state.isLoading}
+						index={i}
+					/>
+				);
+			})}
 		</div>
+	);
+}
+type EntityProps = {
+	entity?: SelectEntity & {id: number};
+	index: number;
+	isLoading: boolean;
+};
+function EntityCard({entity, isLoading}: EntityProps) {
+	const image = useEntityImage(
+		isLoading,
+		entity?.id,
+		entity?.imageUrl ?? undefined,
+	);
+
+	return (
+		<ImageCard
+			className='max-w-44'
+			isLoading={isLoading || image.isLoading || !image.data}
+			imageUrl={image.data ?? ''}
+			alt={entity?.name ?? 'Loading'}
+			caption={<Caption entity={entity} />}
+		/>
+	);
+}
+
+function Caption({entity}: {entity?: SelectEntity}) {
+	if (!entity) {
+		return <Skeleton className='w-full h-6' />;
+	}
+
+	return (
+		<span className='flex justify-between flex-wrap gap-2'>
+			<span>{entity.pokedexNumber ?? pascalCase(entity.entityKind)}</span>{' '}
+			{entity.name}
+		</span>
 	);
 }
 
@@ -63,22 +107,25 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious
+						preload='viewport'
 						disabled={page === 0}
 						to={api.path}
-						search={{...search, page: page - 1} as unknown}
+						search={{...search, page: page > 0 ? page - 1 : page} as unknown}
 					/>
 				</PaginationItem>
 				<PaginationItem>
 					<PaginationLink
+						preload='viewport'
 						disabled={page === 0}
 						to={api.path}
-						search={{...search, page: page - 1} as unknown}
+						search={{...search, page: page > 0 ? page - 1 : page} as unknown}
 					>
 						{displayPage - 1}
 					</PaginationLink>
 				</PaginationItem>
 				<PaginationItem>
 					<PaginationLink
+						preload='viewport'
 						to={api.path}
 						search={{...search, page} as unknown}
 						isActive
@@ -89,6 +136,7 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 				<div className='items-center md:flex hidden'>
 					<PaginationItem>
 						<PaginationLink
+							preload='viewport'
 							disabled={!hasMore}
 							to={api.path}
 							search={{...search, page: page + 1} as unknown}
@@ -102,6 +150,7 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 				</div>
 				<PaginationItem>
 					<PaginationNext
+						preload='viewport'
 						disabled={!hasMore}
 						to={api.path}
 						search={{...search, page: page + 1} as unknown}

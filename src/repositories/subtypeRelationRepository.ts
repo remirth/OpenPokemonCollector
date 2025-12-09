@@ -2,7 +2,7 @@ import type {InsertSubtypeRelation} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class SubtypeRelationRepository extends BaseRepository {
-	private tbl = this.tables.subtypesRelationTable;
+	private tbl = this.T.subtypesRelationTable;
 
 	readonly createUnique = async (
 		payload: InsertSubtypeRelation,

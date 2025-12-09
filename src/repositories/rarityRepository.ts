@@ -2,7 +2,7 @@ import type {InsertRarity} from '~/db/schema';
 import {BaseRepository} from './baseRepository';
 
 export class RarityRepository extends BaseRepository {
-	private tbl = this.tables.rarityTable;
+	private tbl = this.T.rarityTable;
 	readonly createUnique = async (payload: InsertRarity, trx = this.db) => {
 		return trx
 			.insert(this.tbl)
