@@ -4,7 +4,6 @@ import {RepositoryContext} from '~/repositories';
 
 export namespace Entities {
 	export async function load(client: QueryClient, props: UseEntitiesProps) {
-		await RepositoryContext.get();
 		const entities = await client.ensureQueryData({
 			queryKey: createEntitiesKey(props),
 			queryFn: () => fetchEntities(props),

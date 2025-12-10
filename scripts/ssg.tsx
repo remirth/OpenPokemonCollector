@@ -53,7 +53,6 @@ export async function htmlTemplate(
 	dehydrated: unknown,
 	tags: Awaited<ReturnType<typeof clientTags>>,
 ) {
-	console.log(dehydrated);
 	const state = JSON.stringify(dehydrated);
 	const template = await lazyLoaded('template', getTemplate);
 	const rewriter = new HTMLRewriter()
