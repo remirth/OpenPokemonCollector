@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "vite build",
+    "build:debug": "VITE_DEBUG_BUILD=1 bun run build",
     "serve": "vite preview",
     "start": "vite",
     "check": "bunx tsc --noEmit --project tsconfig.json",

@@ -96,6 +96,7 @@ export class RepositoryContext {
 	};
 
 	static readonly #createInBrowser = async () => {
+		await DB.loadMigrations();
 		const name = 'pokemon-collector.db';
 		const exists = await this.checkDbExists(name);
 		console.debug('Database Exists', exists);

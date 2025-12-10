@@ -1,4 +1,5 @@
 dist
+.dist-ssr
 .wrangler
 .output
 .dist

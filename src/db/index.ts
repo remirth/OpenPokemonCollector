@@ -1,4 +1,3 @@
-import MIGRATIONS from 'virtual:drizzle-migrations.sql';
 import {migrate} from '@proj-airi/drizzle-orm-browser-migrator/pglite';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 import {NotInitializedError} from '~/lib/errors';
@@ -46,6 +45,7 @@ export namespace DB {
 	}
 
 	export const shouldMigrate = (): boolean => {
+		NotInitializedError.assert('Migrations not loaded', migrations);
 		const data = getPerformedMigrations();
 		if (!data) return true;
 
@@ -70,6 +70,7 @@ export namespace DB {
 	};
 
 	export const updatePerformedMigrations = () => {
+		NotInitializedError.assert('Migrations not loaded', migrations);
 		localStorage.setItem(
 			MIGRATIONS_KEY,
 			JSON.stringify(migrations.map((m) => m.tag)),
@@ -78,11 +79,14 @@ export namespace DB {
 
 	export type DatabaseContext = PgliteDatabase<typeof schema>;
 
-	export const migrations = dedupMigrations(MIGRATIONS).sort(
-		(a, b) => b.when - a.when,
-	);
+	export async function loadMigrations() {
+		const {default: mig} = await import('virtual:drizzle-migrations.sql');
+		migrations = dedupMigrations(mig).sort((a, b) => b.when - a.when);
+	}
 
+	export let migrations: Migration[] | undefined;
 	export async function migrateDatabase(ctx: DatabaseContext) {
+		NotInitializedError.assert('Migrations not loaded', migrations);
 		await migrate(ctx, migrations);
 	}
 

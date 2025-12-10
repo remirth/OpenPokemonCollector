@@ -22,10 +22,7 @@ export function App(props: AppProps) {
 				<HydrationBoundary state={props.dehydratedState}>
 					<StyleProvider storageKey='__style' defaultStyle='default'>
 						<ModeProvider storageKey='__theme' defaultMode='system'>
-							<RouterProvider
-								router={props.router}
-								context={{queryClient: props.queryClient}}
-							/>
+							<RouterProvider router={props.router} />
 						</ModeProvider>
 					</StyleProvider>
 				</HydrationBoundary>
