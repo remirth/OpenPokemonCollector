@@ -5,8 +5,10 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "vite build",
+    "build": "bun run build:client && bun run prerender",
+    "build:client": "vite build",
     "build:debug": "VITE_DEBUG_BUILD=1 bun run build",
+    "prerender": "bun run scripts/prerender",
     "serve": "vite preview",
     "start": "vite",
     "check": "bunx tsc --noEmit --project tsconfig.json",
