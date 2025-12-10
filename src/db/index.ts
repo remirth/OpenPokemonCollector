@@ -1,5 +1,4 @@
 import MIGRATIONS from 'virtual:drizzle-migrations.sql';
-import {IdbFs, PGlite} from '@electric-sql/pglite';
 import {migrate} from '@proj-airi/drizzle-orm-browser-migrator/pglite';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 import {NotInitializedError} from '~/lib/errors';
@@ -24,15 +23,20 @@ function dedupMigrations(lst: Array<Migration>) {
 }
 
 export async function createFs(dbName: string) {
-	// const { IdbFs } = await import('@electric-sql/pglite');
+	const {IdbFs} = await import('@electric-sql/pglite');
 	return new IdbFs(dbName);
 }
 
 export namespace DB {
 	export async function createEngine(name: string, tar?: Blob | File) {
-		// const { PGlite } = await import('@electric-sql/pglite');
+		const {PGlite} = await import('@electric-sql/pglite');
 		const fs = await createFs(name);
 		return new PGlite({fs, loadDataDir: tar});
+	}
+
+	export async function createEngineInMemory(tar?: Blob | File) {
+		const {PGlite} = await import('@electric-sql/pglite');
+		return new PGlite({dataDir: 'memory://open_pokemon.db', loadDataDir: tar});
 	}
 
 	export type DatabaseEngine = Awaited<ReturnType<typeof createEngine>>;

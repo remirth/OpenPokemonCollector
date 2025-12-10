@@ -88,6 +88,14 @@ export class RepositoryContext {
 	};
 
 	static readonly create = async () => {
+		if (typeof window !== 'undefined') {
+			return this.#createInBrowser();
+		} else {
+			return this.#createServerSide();
+		}
+	};
+
+	static readonly #createInBrowser = async () => {
 		const name = 'pokemon-collector.db';
 		const exists = await this.checkDbExists(name);
 		console.debug('Database Exists', exists);
@@ -97,6 +105,7 @@ export class RepositoryContext {
 			const seed = await this.fetchSeed();
 			engine = await DB.createEngine(name, seed);
 		}
+
 		engine ??= await DB.createEngine(name);
 
 		if (import.meta.env.DEV) {
@@ -106,7 +115,6 @@ export class RepositoryContext {
 
 		const ctx = DB.createDbContext(engine);
 		const shouldMigrate = DB.shouldMigrate();
-
 		if (shouldMigrate) {
 			await DB.migrateDatabase(ctx);
 			DB.updatePerformedMigrations();
@@ -116,8 +124,46 @@ export class RepositoryContext {
 		return instance;
 	};
 
+	static readonly #createServerSide = async () => {
+		const path = await import('node:path');
+		const {default: assert} = await import('node:assert');
+		const dbPath = path.join(
+			import.meta.dirname,
+			'..',
+			'..',
+			'public',
+			'seed.db.tgz',
+		);
+
+		let res: Response;
+		if (typeof Bun !== 'undefined') {
+			const fh = Bun.file(dbPath);
+			const exists = await fh.exists();
+			assert.equal(exists, true, `${dbPath} does not exist!`);
+			res = new Response(fh);
+		} else {
+			const fs = await import('node:fs');
+			assert.equal(
+				fs.statSync(dbPath)?.isFile(),
+				true,
+				`${dbPath} does not exist!`,
+			);
+			const rs = fs.createReadStream(dbPath);
+			res = new Response(rs as unknown as BodyInit);
+		}
+
+		const tar = await this.decompress(res);
+		const engine = await DB.createEngineInMemory(tar);
+		const ctx = DB.createDbContext(engine);
+		return new RepositoryContext(ctx, engine, DB.tables);
+	};
+
 	static readonly fetchSeed = async () => {
 		const dump = await http(`${import.meta.env.BASE_URL}seed.db.tgz`);
+		return this.decompress(dump);
+	};
+
+	static readonly decompress = (dump: Response) => {
 		const ds = new DecompressionStream('gzip');
 		NotInitializedError.assert('Response body', dump.body);
 		const decompressed = dump.body.pipeThrough(ds);
