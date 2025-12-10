@@ -1,5 +1,5 @@
 {
-	"id": "5182621f-aee8-4ab9-a8a6-0e1a56830dc8",
+	"id": "9bab9352-7cac-4cee-a8ac-90570479974f",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -83,8 +83,8 @@
 						"cycle": false
 					}
 				},
-				"externalId": {
-					"name": "externalId",
+				"external_id": {
+					"name": "external_id",
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
@@ -123,13 +123,25 @@
 					"name": "image_url",
 					"type": "varchar(255)",
 					"primaryKey": false,
-					"notNull": false
+					"notNull": true
+				},
+				"image_blur": {
+					"name": "image_blur",
+					"type": "varchar(400)",
+					"primaryKey": false,
+					"notNull": true
 				},
 				"image_large_url": {
 					"name": "image_large_url",
 					"type": "varchar(255)",
 					"primaryKey": false,
-					"notNull": false
+					"notNull": true
+				},
+				"image_large_blur": {
+					"name": "image_large_blur",
+					"type": "varchar(400)",
+					"primaryKey": false,
+					"notNull": true
 				}
 			},
 			"indexes": {
@@ -137,7 +149,7 @@
 					"name": "card_external_idx",
 					"columns": [
 						{
-							"expression": "externalId",
+							"expression": "external_id",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -225,10 +237,10 @@
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
-				"cards_externalId_unique": {
-					"name": "cards_externalId_unique",
+				"cards_external_id_unique": {
+					"name": "cards_external_id_unique",
 					"nullsNotDistinct": false,
-					"columns": ["externalId"]
+					"columns": ["external_id"]
 				}
 			},
 			"policies": {},
@@ -647,7 +659,13 @@
 					"name": "image_url",
 					"type": "varchar(255)",
 					"primaryKey": false,
-					"notNull": false
+					"notNull": true
+				},
+				"image_blur": {
+					"name": "image_blur",
+					"type": "varchar(400)",
+					"primaryKey": false,
+					"notNull": true
 				},
 				"search": {
 					"name": "search",

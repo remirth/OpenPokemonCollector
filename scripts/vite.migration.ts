@@ -7,6 +7,7 @@ export default defineConfig({
 	build: {
 		ssr: 'scripts/seed.ts',
 		sourcemap: 'inline',
+		copyPublicDir: false,
 		outDir: '.dist',
 		rollupOptions: {output: {entryFileNames: 'migrate.js'}},
 	},

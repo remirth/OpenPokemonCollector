@@ -22,7 +22,8 @@ export const entityTable = SQL.pgTable(
 		evolvesTo: SQL.text('evolves_to').array(),
 		entityKind: entityKindEnum('entity_kind').notNull(),
 		pokedexNumber: SQL.integer('pokedex_number').unique(),
-		imageUrl: SQL.varchar('image_url', {length: 255}),
+		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
+		imageBlur: SQL.varchar('image_blur', {length: 400}).notNull(),
 		search: tsvector('search').generatedAlwaysAs(
 			(): SQLStatement =>
 				sql`setweight(to_tsvector('simple', coalesce(${entityTable.name}, '')), 'A')`,
@@ -148,7 +149,7 @@ export const cardTable = SQL.pgTable(
 	'cards',
 	{
 		id: SQL.integer('id').primaryKey().generatedAlwaysAsIdentity(),
-		externalId: SQL.varchar({length: 255}).unique().notNull(),
+		externalId: SQL.varchar('external_id', {length: 255}).unique().notNull(),
 		name: SQL.varchar({length: 255}).notNull(),
 		setId: SQL.integer('set_id')
 			.notNull()
@@ -156,8 +157,10 @@ export const cardTable = SQL.pgTable(
 		artistId: SQL.integer('artist_id').references(() => artistTable.id),
 		rarityId: SQL.integer('rarity_id').references(() => rarityTable.id),
 		numberInSet: SQL.varchar('number_in_set', {length: 255}),
-		imageUrl: SQL.varchar('image_url', {length: 255}),
-		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}),
+		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
+		imageBlur: SQL.varchar('image_blur', {length: 400}).notNull(),
+		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}).notNull(),
+		imageLargeBlur: SQL.varchar('image_large_blur', {length: 400}).notNull(),
 	},
 	(tbl) => {
 		return [

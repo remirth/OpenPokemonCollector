@@ -13,6 +13,7 @@ const db = new PGlite({dataDir: 'memory://pokemon_seed.db'});
 
 const ctx = RepositoryContext.bare(db);
 console.log('Got context!');
+await DB.loadMigrations();
 await DB.migrateDatabase(ctx.db);
 console.log('Migrated!');
 
