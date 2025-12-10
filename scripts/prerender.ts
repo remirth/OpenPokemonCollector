@@ -4,7 +4,7 @@ import {clientTags, htmlTemplate, renderUrl} from './ssg';
 const DIST_DIR = '.output';
 const FULL_DIST = path.join(import.meta.dirname, '..', DIST_DIR);
 
-async function _writeOut(pathname: string, html: string) {
+async function writeOut(pathname: string, html: string) {
 	const filePath = path.join(
 		FULL_DIST,
 		pathname.replace(/\/?$/, '/'),
@@ -20,8 +20,7 @@ async function main() {
 	for (const url of routes) {
 		const {html, dehydrated} = await renderUrl(url);
 		const page = await htmlTemplate(html, dehydrated, tags);
-		console.log(page);
-		// await writeOut(url, page);
+		await writeOut(url, page);
 		console.log('Prerendered', url);
 	}
 }

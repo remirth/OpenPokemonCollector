@@ -1,6 +1,7 @@
 import {DB} from '~/db';
 import {NotInitializedError} from '~/lib/errors';
 import {http} from '~/lib/http';
+import {lazyLoaded} from '~/lib/lazy';
 import {ArtistRepository} from './artistRepository';
 import {CardRepository} from './cardRepository';
 import {EntityRelationRepository} from './entityRelationRepository';
@@ -41,17 +42,8 @@ export class RepositoryContext {
 		this.entityRelations = new EntityRelationRepository(this);
 	}
 
-	static #instance: Promise<RepositoryContext> | undefined;
 	static readonly get = () => {
-		try {
-			return NotInitializedError.test(
-				'RepositoryContext instance',
-				this.#instance,
-			);
-		} catch {
-			this.#instance = this.create();
-			return this.#instance;
-		}
+		return lazyLoaded('RepositoryContext', this.create);
 	};
 
 	static readonly databaseIsSeeded = async (engine: DB.DatabaseEngine) => {

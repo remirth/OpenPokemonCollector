@@ -20,7 +20,7 @@ export function usePersistedState<T>(
 			return schema.assert(JSON.parse(value)) as T;
 		} catch (e) {
 			if (typeof window !== 'undefined') {
-				console.error(e);
+				console.warn({message: `Could not load key: ${key}`, error: e});
 				localStorage.removeItem(key);
 			}
 			return resolve(initial);

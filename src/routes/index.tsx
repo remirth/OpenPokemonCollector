@@ -15,7 +15,7 @@ import {
 import {Skeleton} from '~/components/ui/skeleton';
 import type {SelectEntity} from '~/db/schema';
 import {Entities} from '~/hooks/useEntities';
-import {setLoader, useQCFromCtx} from '~/lib/utils';
+import {useQCFromCtx} from '~/lib/utils';
 
 const pokedexSearchSchema = type({
 	'page?': 'number.integer',
@@ -32,14 +32,10 @@ export const Route = createFileRoute('/')({
 		const queryClient = useQCFromCtx(ctx);
 		const search = pokedexSearchSchema.assert(ctx.location.search);
 
-		const loader = () =>
-			Entities.load(queryClient, {
-				page: search.page ?? 0,
-				pageSize: search.pageSize ?? 50,
-			});
-
-		setLoader(loader);
-		await loader();
+		await Entities.load(queryClient, {
+			page: search.page ?? 0,
+			pageSize: search.pageSize ?? 50,
+		});
 	},
 });
 
