@@ -1,5 +1,5 @@
 import {QueryClient} from '@tanstack/react-query';
-import {createRouter} from '@tanstack/react-router';
+import {createMemoryHistory, createRouter} from '@tanstack/react-router';
 import {routeTree} from './routeTree.gen';
 
 export function makeQueryClient() {
@@ -16,13 +16,16 @@ export function makeQueryClient() {
 	});
 }
 
-export function makeRouter(queryClient: QueryClient) {
+export function makeRouter(queryClient: QueryClient, initialUrl?: string) {
 	return createRouter({
 		routeTree,
 		defaultPreload: 'intent',
 		defaultViewTransition: true,
 		scrollRestoration: true,
 		context: {queryClient},
+		history: initialUrl
+			? createMemoryHistory({initialEntries: [initialUrl]})
+			: undefined,
 	});
 }
 // Register things for typesafety

@@ -1,12 +1,15 @@
-import {createContext, useContext, useEffect, useMemo, useState} from 'react';
+import {type} from 'arktype';
+import {createContext, useContext, useEffect, useMemo} from 'react';
 import {usePrefersDark} from '~/hooks/useMediaQuery';
+import {usePersistedState} from '~/hooks/usePersistedState';
 
+export const ModeSchema = type("'light'|'dark'|'system'");
+export type Mode = typeof ModeSchema.infer;
 export const MODES = [
 	{value: 'light', name: 'Light'},
 	{value: 'dark', name: 'Dark'},
 	{value: 'system', name: 'System'},
-] as const;
-export type Mode = (typeof MODES)[number]['value'];
+] satisfies Array<{value: Mode; name: string}>;
 
 type ModeProviderProps = {
 	children: React.ReactNode;
@@ -32,16 +35,11 @@ export function ModeProvider({
 	storageKey = '__current_mode',
 	...props
 }: ModeProviderProps) {
-	const [theme, setMode] = useState<Mode>(defaultMode);
-
-	useEffect(() => {
-		const stored = localStorage.getItem(storageKey);
-		const mode = MODES.find((m) => m.value === stored)?.value;
-
-		if (mode) {
-			setMode(mode);
-		}
-	}, [storageKey]);
+	const [theme, setMode] = usePersistedState(
+		storageKey,
+		ModeSchema,
+		defaultMode,
+	);
 
 	const systemIsDark = usePrefersDark();
 
@@ -61,7 +59,7 @@ export function ModeProvider({
 				setMode(theme);
 			},
 		}),
-		[theme, storageKey],
+		[theme, setMode, storageKey],
 	);
 
 	return (

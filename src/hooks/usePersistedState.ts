@@ -19,8 +19,10 @@ export function usePersistedState<T>(
 
 			return schema.assert(JSON.parse(value)) as T;
 		} catch (e) {
-			console.error(e);
-			localStorage.removeItem(key);
+			if (typeof window !== 'undefined') {
+				console.error(e);
+				localStorage.removeItem(key);
+			}
 			return resolve(initial);
 		}
 	});

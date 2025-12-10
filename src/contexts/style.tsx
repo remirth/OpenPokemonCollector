@@ -1,10 +1,13 @@
-import {createContext, useContext, useEffect, useMemo, useState} from 'react';
+import {type} from 'arktype';
+import {createContext, useContext, useEffect, useMemo} from 'react';
+import {usePersistedState} from '~/hooks/usePersistedState';
 
+export const StyleSchema = type("'default'|'rose'");
+export type Style = typeof StyleSchema.infer;
 export const STYLES = [
 	{value: 'default', name: 'Default'},
 	{value: 'rose', name: 'Rose'},
-] as const;
-export type Style = (typeof STYLES)[number]['value'];
+] satisfies Array<{value: Style; name: string}>;
 
 type StyleProviderProps = {
 	children: React.ReactNode;
@@ -30,10 +33,11 @@ export function StyleProvider({
 	storageKey = '__current_style',
 	...props
 }: StyleProviderProps) {
-	const [style, setStyle] = useState<Style>(() => {
-		const stored = localStorage.getItem(storageKey);
-		return STYLES.find((s) => s.value === stored)?.value ?? defaultStyle;
-	});
+	const [style, setStyle] = usePersistedState(
+		storageKey,
+		StyleSchema,
+		defaultStyle,
+	);
 
 	useEffect(() => {
 		const root = window.document.documentElement;
@@ -48,7 +52,7 @@ export function StyleProvider({
 				setStyle(style);
 			},
 		}),
-		[style, storageKey],
+		[style, storageKey, setStyle],
 	);
 
 	return (
