@@ -23,7 +23,6 @@ export const entityTable = SQL.pgTable(
 		entityKind: entityKindEnum('entity_kind').notNull(),
 		pokedexNumber: SQL.integer('pokedex_number').unique(),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
-		imageBlur: SQL.varchar('image_blur', {length: 400}).notNull(),
 		search: tsvector('search').generatedAlwaysAs(
 			(): SQLStatement =>
 				sql`setweight(to_tsvector('simple', coalesce(${entityTable.name}, '')), 'A')`,
@@ -158,9 +157,7 @@ export const cardTable = SQL.pgTable(
 		rarityId: SQL.integer('rarity_id').references(() => rarityTable.id),
 		numberInSet: SQL.varchar('number_in_set', {length: 255}),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
-		imageBlur: SQL.varchar('image_blur', {length: 400}).notNull(),
 		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}).notNull(),
-		imageLargeBlur: SQL.varchar('image_large_blur', {length: 400}).notNull(),
 	},
 	(tbl) => {
 		return [

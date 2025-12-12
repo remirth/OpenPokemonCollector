@@ -8,7 +8,6 @@ import {
 	toError,
 } from '../src/lib/errors';
 import type {RepositoryContext} from '../src/repositories';
-import {prefetchImagesForCards} from './image';
 import {cleanCardName} from './lib';
 import {Pokedex} from './pokedex';
 import {
@@ -27,10 +26,13 @@ const setUrl = new URL(
 
 const baseCardUrl = `https://raw.githubusercontent.com/remirth/pokemon-tcg-data/master/cards/en/`;
 
-const IMAGES_TASKS = new Map<
-	string,
-	ReturnType<typeof prefetchImagesForCards>
->();
+function getPokedexImage(pokedexNumber: number) {
+	return `https://static-opc.remirth.com/pokedex/${pokedexNumber}.webp`;
+}
+
+function getCardImage(set: string, id: string, large: boolean) {
+	return `https://static-opc.remirth.com/cards/${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
+}
 
 export async function importData(ctx: RepositoryContext) {
 	let sets: PokemonSetFile;
@@ -54,7 +56,6 @@ export async function importData(ctx: RepositoryContext) {
 		console.error(e);
 	});
 
-	const _images = new Map<string, {blur: string; filePath: string}>();
 	let i = 0;
 	for await (const result of channel) {
 		if (!result.ok) {
@@ -87,16 +88,6 @@ async function importSet(
 		length: cards.length,
 		releaseDate: set.releaseDate,
 	});
-	console.log('Fetching and storing images');
-	const imageTask = IMAGES_TASKS.get(set.id);
-	NotInitializedError.assert(
-		`Prefetch image task for set ${set.id}`,
-		imageTask,
-	);
-
-	const images = await imageTask;
-	console.log('Fetched images!');
-
 	const setId = await ctx.sets.createUnique(
 		{
 			externalId: set.id,
@@ -138,20 +129,14 @@ async function importSet(
 				const name = pokedex.get(pokedexNumber);
 				NotInitializedError.assert(`Pokedex Entry for ${pokedexNumber}`, name);
 
-				const image = images.get(String(pokedexNumber));
-				NotInitializedError.assert(
-					`Image for for ${String(pokedexNumber)}`,
-					image,
-				);
 				await ctx.entities
 					.createUnique(
 						{
 							entityKind,
 							name,
-							slug: encodeURI(kebabCase(name)),
+							slug: encodeURIComponent(kebabCase(name)),
 							pokedexNumber,
-							imageUrl: image.filePath,
-							imageBlur: image.blur,
+							imageUrl: getPokedexImage(pokedexNumber),
 							evolvesFrom: card.evolvesFrom,
 							evolvesTo: card.evolvesTo,
 						},
@@ -161,17 +146,14 @@ async function importSet(
 			}
 		} else {
 			const name = cleanCardName(card.name);
-			const image = images.get(card.images.small);
-			NotInitializedError.assert(`Image for for ${card.images.small}`, image);
 
 			await ctx.entities
 				.createUniqueBySlug(
 					{
 						entityKind,
 						name,
-						imageUrl: image.filePath,
-						imageBlur: image.blur,
-						slug: encodeURI(kebabCase(name)),
+						imageUrl: getCardImage(set.id, card.id, false),
+						slug: encodeURIComponent(kebabCase(name)),
 						evolvesFrom: card.evolvesFrom,
 						evolvesTo: card.evolvesTo,
 					},
@@ -201,26 +183,17 @@ async function importSet(
 		}
 
 		let cardId: number;
-		const image = images.get(card.images.small);
-		const imageLarge = images.get(card.images.large);
-		NotInitializedError.assert(`Image for for ${card.images.small}`, image);
-		NotInitializedError.assert(
-			`Image for for ${card.images.large}`,
-			imageLarge,
-		);
 
 		cardId = await ctx.cards.createUnique(
 			{
 				externalId: card.id,
 				artistId,
 				rarityId,
-				imageBlur: image.blur,
 				setId,
 				name: card.name,
 				numberInSet: card.number,
-				imageUrl: image.filePath,
-				imageLargeUrl: imageLarge.filePath,
-				imageLargeBlur: imageLarge.blur,
+				imageUrl: getCardImage(set.id, card.id, false),
+				imageLargeUrl: getCardImage(set.id, card.id, true),
 			},
 			trx,
 		);
@@ -302,7 +275,6 @@ async function fetchCards(channel: Chan<FetchResult>, sets: PokemonSetFile) {
 
 		for (const task of tasks) {
 			const result = await task;
-			IMAGES_TASKS.set(result.set.id, prefetchImagesForCards(result.cards));
 			await channel.send(result);
 		}
 	} catch (e) {

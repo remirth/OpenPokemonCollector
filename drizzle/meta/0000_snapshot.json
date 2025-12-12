@@ -1,5 +1,5 @@
 {
-	"id": "9bab9352-7cac-4cee-a8ac-90570479974f",
+	"id": "971e395a-7e1b-4ab1-a1cb-98d1e35ad6ef",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -125,21 +125,9 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"image_blur": {
-					"name": "image_blur",
-					"type": "varchar(400)",
-					"primaryKey": false,
-					"notNull": true
-				},
 				"image_large_url": {
 					"name": "image_large_url",
 					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"image_large_blur": {
-					"name": "image_large_blur",
-					"type": "varchar(400)",
 					"primaryKey": false,
 					"notNull": true
 				}
@@ -658,12 +646,6 @@
 				"image_url": {
 					"name": "image_url",
 					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"image_blur": {
-					"name": "image_blur",
-					"type": "varchar(400)",
 					"primaryKey": false,
 					"notNull": true
 				},
