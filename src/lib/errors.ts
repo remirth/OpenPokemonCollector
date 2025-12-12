@@ -42,6 +42,16 @@ export class AppError extends Error {
 	}
 }
 
+export class AssertionError extends AppError {
+	static isNotNaN(name: string, n: number) {
+		if (Number.isNaN(n)) {
+			throw new AssertionError(`Assertion: Expected ${name} to not be NaN!`);
+		}
+
+		return n;
+	}
+}
+
 export class FetchError extends AppError {
 	constructor(url: string | URL, e?: unknown) {
 		super(`Failed to connect to ${url}`, e);

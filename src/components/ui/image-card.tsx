@@ -3,7 +3,7 @@ import {cn} from '~/lib/utils';
 import {Skeleton} from './skeleton';
 
 type Props = {
-	imageUrl: string;
+	imageUrl?: string;
 	caption: React.ReactNode;
 	className?: string;
 	isLoading?: boolean;
@@ -29,7 +29,7 @@ export default function ImageCard({
 			) : (
 				<img
 					className='w-full aspect-4/3'
-					src={imageUrl}
+					src={imageUrl ?? '/public/puff.svg'}
 					alt={alt}
 					decoding='async'
 					loading='lazy'

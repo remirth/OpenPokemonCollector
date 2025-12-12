@@ -1,12 +1,22 @@
-import {createFileRoute} from '@tanstack/react-router';
+import {createFileRoute, useNavigate} from '@tanstack/react-router';
 import {type} from 'arktype';
 import {pascalCase} from 'change-case';
-import {useMemo} from 'react';
+import {ChevronDown} from 'lucide-react';
+import {useCallback, useMemo} from 'react';
+import {Button} from '~/components/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
 import ImageCard from '~/components/ui/image-card';
 import {
 	Pagination,
 	PaginationContent,
-	PaginationEllipsis,
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
@@ -15,11 +25,12 @@ import {
 import {Skeleton} from '~/components/ui/skeleton';
 import type {SelectEntity} from '~/db/schema';
 import {Entities} from '~/hooks/useEntities';
+import {AssertionError} from '~/lib/errors';
 import {useQCFromCtx} from '~/lib/utils';
 
 const pokedexSearchSchema = type({
-	'page?': 'number.integer',
-	'pageSize?': 'number.integer',
+	'page?': 'number.integer >= 0',
+	'pageSize?': 'number.integer >= 0',
 });
 
 type PokedexSearch = typeof pokedexSearchSchema.infer;
@@ -56,18 +67,26 @@ function HomeComponent() {
 	);
 
 	return (
-		<div className='flex flex-row flex-wrap gap-2 align-middle w-full h-fit p-4 pb-16'>
-			<PokedexPagination hasMore={(state.data?.length ?? 0) >= pageSize} />
-			{items.map((_, i) => {
-				return (
-					<EntityCard
-						key={state.data?.[i]?.id ?? i}
-						entity={state.data?.[i]}
-						isLoading={state.isLoading}
-						index={i}
-					/>
-				);
-			})}
+		<div className='w-full max-w-fit flex flex-col p-4 gap-2 relative'>
+			<div className='flex flex-row gap-2'>
+				<PokedexPageSize pageSize={pageSize} />
+				<PokedexPagination
+					className='mx-0 w-fit'
+					hasMore={(state.data?.length ?? 0) >= pageSize}
+				/>
+			</div>
+			<div className='flex flex-row flex-wrap gap-2 align-middle w-full h-fit pb-16 max-w-fit'>
+				{items.map((_, i) => {
+					return (
+						<EntityCard
+							key={state.data?.[i]?.id ?? i}
+							entity={state.data?.[i]}
+							isLoading={state.isLoading}
+							index={i}
+						/>
+					);
+				})}
+			</div>
 		</div>
 	);
 }
@@ -77,16 +96,11 @@ type EntityProps = {
 	isLoading: boolean;
 };
 function EntityCard({entity, isLoading}: EntityProps) {
-	const image = Entities.useEntityImage({
-		id: entity?.id,
-		imageUrl: entity?.imageUrl,
-	});
-
 	return (
 		<ImageCard
 			className='max-w-44'
-			isLoading={isLoading || image.isLoading || !image.data}
-			imageUrl={image.data ?? ''}
+			isLoading={isLoading || entity == null}
+			imageUrl={entity?.imageUrl}
 			alt={entity?.name ?? 'Loading'}
 			caption={<Caption entity={entity} />}
 		/>
@@ -106,13 +120,16 @@ function Caption({entity}: {entity?: SelectEntity}) {
 	);
 }
 
-const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
+const PokedexPagination = ({
+	hasMore,
+	...props
+}: {hasMore: boolean} & React.ComponentProps<'nav'>) => {
 	const search = api.useSearch();
 	const page = search.page ?? 0;
 	const displayPage = page + 1;
 
 	return (
-		<Pagination>
+		<Pagination {...props}>
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious
@@ -125,35 +142,12 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 				<PaginationItem>
 					<PaginationLink
 						preload='viewport'
-						disabled={page === 0}
-						to={api.path}
-						search={{...search, page: page > 0 ? page - 1 : page} as unknown}
-					>
-						{displayPage - 1}
-					</PaginationLink>
-				</PaginationItem>
-				<PaginationItem>
-					<PaginationLink
-						preload='viewport'
 						to={api.path}
 						search={{...search, page} as unknown}
 						isActive
 					>
 						{displayPage}
 					</PaginationLink>
-				</PaginationItem>
-				<PaginationItem className='hidden md:flex items-center'>
-					<PaginationLink
-						preload='viewport'
-						disabled={!hasMore}
-						to={api.path}
-						search={{...search, page: page + 1} as unknown}
-					>
-						{displayPage + 1}
-					</PaginationLink>
-				</PaginationItem>
-				<PaginationItem className='hidden md:flex items-center'>
-					<PaginationEllipsis />
 				</PaginationItem>
 				<PaginationItem>
 					<PaginationNext
@@ -167,3 +161,45 @@ const PokedexPagination = ({hasMore}: {hasMore: boolean}) => {
 		</Pagination>
 	);
 };
+
+export default function PokedexPageSize({
+	pageSize,
+	...props
+}: {pageSize: number} & React.ComponentProps<typeof DropdownMenu>) {
+	const navigate = useNavigate();
+	const update = useCallback(
+		(value: string) => {
+			const size = Number.parseInt(value, 10);
+			AssertionError.isNotNaN('Selected page size', size);
+
+			navigate({search: (prev) => ({...prev, pageSize: size}) as never});
+		},
+		[navigate],
+	);
+	return (
+		<DropdownMenu {...props}>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant='noShadow'
+					className='bg-secondary-background text-black dark:text-white'
+				>
+					{pageSize}
+					<ChevronDown />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align='start' className='w-56'>
+				<DropdownMenuLabel inset>Page Size</DropdownMenuLabel>
+				<DropdownMenuGroup>
+					<DropdownMenuRadioGroup
+						value={String(pageSize)}
+						onValueChange={update}
+					>
+						<DropdownMenuRadioItem value='50'>50</DropdownMenuRadioItem>
+						<DropdownMenuRadioItem value='100'>100</DropdownMenuRadioItem>
+						<DropdownMenuRadioItem value='150'>150</DropdownMenuRadioItem>
+					</DropdownMenuRadioGroup>
+				</DropdownMenuGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
