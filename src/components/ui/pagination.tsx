@@ -61,7 +61,8 @@ function PaginationLink({
 					size,
 				}),
 				className,
-				disabled && 'bg-secondary-background cursor-not-allowed',
+				disabled &&
+					'bg-secondary-background text-foreground cursor-not-allowed',
 				isActive && 'bg-black text-white',
 			)}
 			{...(props as any)}

@@ -35,7 +35,7 @@ export default function ImageCard({
 					loading='lazy'
 				/>
 			)}
-			<figcaption className='border-t-2 text-main-foreground bg-secondary-background border-border p-4 h-full'>
+			<figcaption className='border-t-2 text-foreground bg-secondary-background border-border p-4 h-full'>
 				{caption}
 			</figcaption>
 		</figure>

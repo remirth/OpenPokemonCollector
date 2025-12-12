@@ -180,14 +180,17 @@ export default function PokedexPageSize({
 		<DropdownMenu {...props}>
 			<DropdownMenuTrigger asChild>
 				<Button
+					className='bg-secondary-background text-foreground'
 					variant='noShadow'
-					className='bg-secondary-background text-black dark:text-white'
 				>
 					{pageSize}
 					<ChevronDown />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align='start' className='w-56'>
+			<DropdownMenuContent
+				align='start'
+				className='w-20 bg-secondary-background text-foreground'
+			>
 				<DropdownMenuLabel inset>Page Size</DropdownMenuLabel>
 				<DropdownMenuGroup>
 					<DropdownMenuRadioGroup

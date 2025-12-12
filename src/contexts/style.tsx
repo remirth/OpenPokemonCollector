@@ -2,11 +2,12 @@ import {type} from 'arktype';
 import {createContext, useContext, useEffect, useMemo} from 'react';
 import {usePersistedState} from '~/hooks/usePersistedState';
 
-export const StyleSchema = type("'default'|'rose'");
+export const StyleSchema = type("'default'|'rose'|'navy'");
 export type Style = typeof StyleSchema.infer;
 export const STYLES = [
 	{value: 'default', name: 'Default'},
 	{value: 'rose', name: 'Rose'},
+	{value: 'navy', name: 'Navy'},
 ] satisfies Array<{value: Style; name: string}>;
 
 type StyleProviderProps = {
