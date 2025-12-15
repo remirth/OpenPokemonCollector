@@ -20,7 +20,14 @@ export function makeRouter(queryClient: QueryClient, initialUrl?: string) {
 	return createRouter({
 		routeTree,
 		defaultPreload: 'intent',
-		defaultViewTransition: true,
+		defaultViewTransition: {
+			types: ({fromLocation, toLocation}) => {
+				const fromIndex = fromLocation?.state?.__TSR_index ?? 0;
+				const toIndex = toLocation?.state?.__TSR_index ?? fromIndex;
+				const direction = fromIndex > toIndex ? 'right' : 'left';
+				return [`hypr-slide-${direction}`, 'micro-blur'];
+			},
+		},
 		scrollRestoration: true,
 		context: {queryClient},
 		history: initialUrl

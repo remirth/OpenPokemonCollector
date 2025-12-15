@@ -19,6 +19,8 @@
   --chart-4: #FF4D50;
   --chart-5: #0099FF;
   --chart-active-dot: #000;
+  --vt-duration: 100ms;
+  --vt-ease: cubic-bezier(0.2, 0.8, 0, 1);
 }
 
 .dark {
@@ -228,3 +230,58 @@ html.dark body::-webkit-scrollbar-thumb {
   }
 }
 
+/* View Transition speed override */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 100ms;
+}
+
+/* Micro blur animation for view transitions */
+@keyframes vt-micro-blur-old {
+  from { filter: none; opacity: 1; }
+  to { filter: blur(3px); opacity: 0.98; }
+}
+
+@keyframes vt-micro-blur-new {
+  from { filter: blur(3px); opacity: 0.98; }
+  to { filter: none; opacity: 1; }
+}
+
+::view-transition-old(.micro-blur) {
+  animation: vt-micro-blur-old 100ms ease-out both;
+}
+
+::view-transition-new(.micro-blur) {
+  animation: vt-micro-blur-new 100ms ease-in both;
+}
+
+/* Hyprland-style directional slide transitions */
+@keyframes vt-hypr-slide-left-old {
+  from { transform: translateX(0) scale(1); filter: none; opacity: 1; }
+  to { transform: translateX(-12px) scale(0.998); filter: blur(3px); opacity: 0.98; }
+}
+@keyframes vt-hypr-slide-left-new {
+  from { transform: translateX(12px) scale(1.002); filter: blur(3px); opacity: 0.98; }
+  to { transform: translateX(0) scale(1); filter: none; opacity: 1; }
+}
+@keyframes vt-hypr-slide-right-old {
+  from { transform: translateX(0) scale(1); filter: none; opacity: 1; }
+  to { transform: translateX(12px) scale(0.998); filter: blur(3px); opacity: 0.98; }
+}
+@keyframes vt-hypr-slide-right-new {
+  from { transform: translateX(-12px) scale(1.002); filter: blur(3px); opacity: 0.98; }
+  to { transform: translateX(0) scale(1); filter: none; opacity: 1; }
+}
+
+::view-transition-old(.hypr-slide-left) {
+  animation: vt-hypr-slide-left-old var(--vt-duration) var(--vt-ease) both;
+}
+::view-transition-new(.hypr-slide-left) {
+  animation: vt-hypr-slide-left-new var(--vt-duration) var(--vt-ease) both;
+}
+::view-transition-old(.hypr-slide-right) {
+  animation: vt-hypr-slide-right-old var(--vt-duration) var(--vt-ease) both;
+}
+::view-transition-new(.hypr-slide-right) {
+  animation: vt-hypr-slide-right-new var(--vt-duration) var(--vt-ease) both;
+}
