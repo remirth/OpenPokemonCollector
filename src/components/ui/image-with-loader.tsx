@@ -44,7 +44,9 @@ export function ImageWithSkeleton({
 			)}
 			style={aspectRatio ? ({aspectRatio} as React.CSSProperties) : undefined}
 		>
-			{showSkeleton && <Skeleton className='absolute inset-0 h-full w-full' />}
+			{showSkeleton && (
+				<Skeleton className='absolute inset-0 h-full w-full rounded-none' />
+			)}
 
 			{!failed && !isLoading && (
 				<img

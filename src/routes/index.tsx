@@ -68,29 +68,32 @@ function HomeComponent() {
 	);
 
 	return (
-		<Card className='max-w-fit flex flex-col gap-4 m-8 h-fit overflow-y-auto'>
-			<CardHeader className='flex flex-row gap-2'>
-				<PokedexPageSize pageSize={pageSize} />
-				<PokedexPagination
-					className='mx-0 w-fit'
-					hasMore={(state.data?.length ?? 0) >= pageSize}
-				/>
-			</CardHeader>
-			<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16 max-w-fit'>
-				{items.map((_, i) => {
-					return (
-						<EntityCard
-							// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid rerender on load
-							key={i}
-							entity={state.data?.[i]}
-							isLoading={state.isLoading}
-							index={i}
-							className={cn(state.data && i > state.data.length && 'hidden')}
-						/>
-					);
-				})}
-			</CardContent>
-		</Card>
+		<section className='grid grid-rows-12 h-full w-full p-8 gap-4'>
+			<Card className='row-span-2'></Card>
+			<Card className='max-w-fit flex flex-col gap-4  overflow-y-auto w-full row-span-10'>
+				<CardHeader className='flex flex-row gap-2'>
+					<PokedexPageSize pageSize={pageSize} />
+					<PokedexPagination
+						className='mx-0 w-fit'
+						hasMore={(state.data?.length ?? 0) >= pageSize}
+					/>
+				</CardHeader>
+				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16 max-w-fit'>
+					{items.map((_, i) => {
+						return (
+							<EntityCard
+								// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid rerender on load
+								key={i}
+								entity={state.data?.[i]}
+								isLoading={state.isLoading}
+								index={i}
+								className={cn(state.data && i >= state.data.length && 'hidden')}
+							/>
+						);
+					})}
+				</CardContent>
+			</Card>
+		</section>
 	);
 }
 type EntityProps = {
