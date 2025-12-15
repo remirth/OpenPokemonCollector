@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom/client';
+import ReactDOM, {hydrateRoot} from 'react-dom/client';
 import './styles.css';
 import {App} from './App';
 import {NotInitializedError} from './lib/errors';
@@ -23,11 +23,19 @@ await addPersistence(queryClient);
 // biome-ignore lint/suspicious/noExplicitAny: We need to access window
 const dehydratedState = (window as any)['__TQ_DEHYDRATED__'] ?? null;
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-	<App
-		queryClient={queryClient}
-		router={router}
-		dehydratedState={dehydratedState}
-	/>,
+const Render = () => (
+	<>
+		<App
+			queryClient={queryClient}
+			router={router}
+			dehydratedState={dehydratedState}
+		/>
+	</>
 );
+
+if (rootElement.hasChildNodes()) {
+	hydrateRoot(rootElement, <Render />);
+} else {
+	const root = ReactDOM.createRoot(rootElement);
+	root.render(<Render />);
+}

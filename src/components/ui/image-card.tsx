@@ -1,6 +1,6 @@
 import type * as React from 'react';
 import {cn} from '~/lib/utils';
-import {Skeleton} from './skeleton';
+import {ImageWithSkeleton} from './image-with-loader';
 
 type Props = {
 	imageUrl?: string;
@@ -20,21 +20,16 @@ export default function ImageCard({
 	return (
 		<figure
 			className={cn(
-				'w-[250px] overflow-hidden rounded-base border-2 border-border bg-main font-base shadow-shadow',
+				'w-66 overflow-hidden rounded-base border-2 border-border bg-main font-base shadow-shadow',
 				className,
 			)}
 		>
-			{isLoading ? (
-				<Skeleton className='w-full aspect-4/3' />
-			) : (
-				<img
-					className='w-full aspect-4/3'
-					src={imageUrl ?? '/public/puff.svg'}
-					alt={alt}
-					decoding='async'
-					loading='lazy'
-				/>
-			)}
+			<ImageWithSkeleton
+				aspectRatio='4/3'
+				alt={alt}
+				src={imageUrl ?? '/public/puff.svg'}
+				isLoading={isLoading}
+			/>
 			<figcaption className='border-t-2 text-foreground bg-secondary-background border-border p-4 h-full'>
 				{caption}
 			</figcaption>
