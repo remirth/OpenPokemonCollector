@@ -1,6 +1,7 @@
 import ReactDOM, {hydrateRoot} from 'react-dom/client';
 import './styles.css';
-import {App} from './App';
+import {RouterProvider} from '@tanstack/react-router';
+import {RouterClient} from '@tanstack/react-router/ssr/client';
 import {NotInitializedError} from './lib/errors';
 import {addPersistence} from './persist';
 import {RepositoryContext} from './repositories';
@@ -20,22 +21,15 @@ const router = makeRouter(queryClient);
 
 await addPersistence(queryClient);
 
-// biome-ignore lint/suspicious/noExplicitAny: We need to access window
-const dehydratedState = (window as any)['__TQ_DEHYDRATED__'] ?? null;
-
-const Render = () => (
-	<>
-		<App
-			queryClient={queryClient}
-			router={router}
-			dehydratedState={dehydratedState}
-		/>
-	</>
+const element = import.meta.env.DEV ? (
+	<RouterProvider router={router} />
+) : (
+	<RouterClient router={router} />
 );
 
 if (rootElement.hasChildNodes()) {
-	hydrateRoot(rootElement, <Render />);
+	hydrateRoot(rootElement, element);
 } else {
 	const root = ReactDOM.createRoot(rootElement);
-	root.render(<Render />);
+	root.render(element);
 }

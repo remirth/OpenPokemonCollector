@@ -1,5 +1,9 @@
-import {QueryClient} from '@tanstack/react-query';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {createMemoryHistory, createRouter} from '@tanstack/react-router';
+import {setupRouterSsrQueryIntegration} from '@tanstack/react-router-ssr-query';
+import type React from 'react';
+import {ModeProvider} from './contexts/mode';
+import {StyleProvider} from './contexts/style';
 import {routeTree} from './routeTree.gen';
 
 export function makeQueryClient() {
@@ -17,7 +21,7 @@ export function makeQueryClient() {
 }
 
 export function makeRouter(queryClient: QueryClient, initialUrl?: string) {
-	return createRouter({
+	const router = createRouter({
 		routeTree,
 		defaultPreload: 'intent',
 		defaultViewTransition: {
@@ -33,7 +37,22 @@ export function makeRouter(queryClient: QueryClient, initialUrl?: string) {
 		history: initialUrl
 			? createMemoryHistory({initialEntries: [initialUrl]})
 			: undefined,
+		Wrap: ({children}: {children: React.ReactNode}) => (
+			<QueryClientProvider client={queryClient}>
+				<StyleProvider storageKey='__style'>
+					<ModeProvider storageKey='__theme'>{children}</ModeProvider>
+				</StyleProvider>
+			</QueryClientProvider>
+		),
 	});
+
+	setupRouterSsrQueryIntegration({
+		router,
+		queryClient,
+		wrapQueryClient: false,
+	});
+
+	return router;
 }
 // Register things for typesafety
 declare module '@tanstack/react-router' {

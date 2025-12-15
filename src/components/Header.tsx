@@ -1,4 +1,4 @@
-import {Link} from '@tanstack/react-router';
+import {ClientOnly, Link} from '@tanstack/react-router';
 import {Star} from 'lucide-react';
 import pkg from '~/../package.json';
 import {Button} from '~/components/ui/button';
@@ -51,7 +51,9 @@ export function Header({className}: {className?: string}) {
 							<GithubIcon className='size-4' />
 							<div className='items-center justify-center gap-0.5 hidden md:flex'>
 								<span className='text-xs font-medium leading-none'>
-									{isLoading ? '...' : stars ? stars.toLocaleString() : '0'}
+									<ClientOnly fallback={'...'}>
+										{isLoading ? '...' : stars ? stars.toLocaleString() : '0'}
+									</ClientOnly>
 								</span>
 								<Star className='size-2.5 -mt-0.5' />
 							</div>

@@ -12,7 +12,7 @@ export const MODES = [
 ] satisfies Array<{value: Mode; name: string}>;
 
 type ModeProviderProps = {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	defaultMode?: Mode;
 	storageKey?: string;
 };

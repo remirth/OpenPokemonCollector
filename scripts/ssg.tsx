@@ -1,19 +1,30 @@
 import path from 'node:path';
-import {dehydrate} from '@tanstack/react-query';
-import {renderToString} from 'react-dom/server';
+import {
+	createRequestHandler,
+	RouterServer,
+	renderRouterToString,
+} from '@tanstack/react-router/ssr/server';
+import React from 'react';
 import {NotInitializedError} from '~/lib/errors';
 import {lazyLoaded} from '~/lib/lazy';
-import {App} from '../src/App';
 import {makeQueryClient, makeRouter} from '../src/router';
 
 export async function renderUrl(url: string) {
-	const qc = makeQueryClient();
-	const router = makeRouter(qc, url);
-
-	await router.load();
-	const app = <App queryClient={qc} router={router} />;
-	const html = renderToString(app);
-	return {html, dehydrated: dehydrate(qc)};
+	const request = new Request(`http://localhost${url}`);
+	const createRouter = () => {
+		const qc = makeQueryClient();
+		return makeRouter(qc);
+	};
+	const handler = createRequestHandler({request, createRouter});
+	const response = await handler((args) =>
+		renderRouterToString({
+			...args,
+			children: React.createElement(RouterServer, {
+				router: args.router,
+			}),
+		}),
+	);
+	return await response.text();
 }
 
 export async function clientTags(dist: string) {
@@ -50,10 +61,8 @@ function getTemplate() {
 
 export async function htmlTemplate(
 	body: string,
-	dehydrated: unknown,
 	tags: Awaited<ReturnType<typeof clientTags>>,
 ) {
-	const state = JSON.stringify(dehydrated);
 	const template = await lazyLoaded('template', getTemplate);
 	const rewriter = new HTMLRewriter()
 		.on("script[type='module']", {
@@ -75,13 +84,6 @@ export async function htmlTemplate(
 		.on('div[id=app]', {
 			element(el) {
 				el.append(body, {html: true});
-			},
-		})
-		.on('body', {
-			element(el) {
-				el.append(`<script>window.__TQ_DEHYDRATED__ = ${state}</script>`, {
-					html: true,
-				});
 			},
 		});
 

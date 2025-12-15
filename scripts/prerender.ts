@@ -16,10 +16,10 @@ async function writeOut(pathname: string, html: string) {
 
 async function main() {
 	const tags = await clientTags(FULL_DIST);
-	const routes = ['/', '/about'];
+	const routes = ['/', '/cards'];
 	for (const url of routes) {
-		const {html, dehydrated} = await renderUrl(url);
-		const page = await htmlTemplate(html, dehydrated, tags);
+		const html = await renderUrl(url);
+		const page = await htmlTemplate(html, tags);
 		await writeOut(url, page);
 		console.log('Prerendered', url);
 	}

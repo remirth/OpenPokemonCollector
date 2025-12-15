@@ -1,5 +1,5 @@
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
-import {createRootRoute, Outlet} from '@tanstack/react-router';
+import {createRootRoute, Outlet, Scripts} from '@tanstack/react-router';
 import {TanStackRouterDevtools} from '@tanstack/react-router-devtools';
 import {Header} from '~/components/Header';
 import {AppSidebar} from '~/components/Sidebar';
@@ -25,6 +25,7 @@ function RootComponent() {
 			</div>
 			<TanStackRouterDevtools position='bottom-right' />
 			<ReactQueryDevtools position='left' buttonPosition='bottom-left' />
+			<Scripts />
 		</>
 	);
 }

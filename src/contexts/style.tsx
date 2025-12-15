@@ -11,7 +11,7 @@ export const STYLES = [
 ] satisfies Array<{value: Style; name: string}>;
 
 type StyleProviderProps = {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	defaultStyle?: Style;
 	storageKey?: string;
 };
