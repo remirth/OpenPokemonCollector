@@ -4,6 +4,7 @@ import {pascalCase} from 'change-case';
 import {ChevronDown} from 'lucide-react';
 import {useCallback, useMemo} from 'react';
 import {Button} from '~/components/ui/button';
+import {Card, CardContent, CardHeader} from '~/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,7 +27,7 @@ import {Skeleton} from '~/components/ui/skeleton';
 import type {SelectEntity} from '~/db/schema';
 import {Entities} from '~/hooks/useEntities';
 import {AssertionError} from '~/lib/errors';
-import {useQCFromCtx} from '~/lib/utils';
+import {cn, useQCFromCtx} from '~/lib/utils';
 
 const pokedexSearchSchema = type({
 	'page?': 'number.integer >= 0',
@@ -62,32 +63,34 @@ function HomeComponent() {
 	});
 
 	const items = useMemo(
-		() => Array.from({length: state.data?.length ?? pageSize}).fill(0),
-		[state.data?.length, pageSize],
+		() => Array.from({length: pageSize}).fill(0),
+		[pageSize],
 	);
 
 	return (
-		<div className='w-full max-w-fit flex flex-col p-4 gap-2 relative'>
-			<div className='flex flex-row gap-2'>
+		<Card className='max-w-fit flex flex-col gap-4 m-8 h-fit overflow-y-auto'>
+			<CardHeader className='flex flex-row gap-2'>
 				<PokedexPageSize pageSize={pageSize} />
 				<PokedexPagination
 					className='mx-0 w-fit'
 					hasMore={(state.data?.length ?? 0) >= pageSize}
 				/>
-			</div>
-			<div className='flex flex-row flex-wrap gap-2 align-middle w-full h-fit pb-16 max-w-fit'>
+			</CardHeader>
+			<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16 max-w-fit'>
 				{items.map((_, i) => {
 					return (
 						<EntityCard
-							key={state.data?.[i]?.id ?? i}
+							// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid rerender on load
+							key={i}
 							entity={state.data?.[i]}
 							isLoading={state.isLoading}
 							index={i}
+							className={cn(state.data && i > state.data.length && 'hidden')}
 						/>
 					);
 				})}
-			</div>
-		</div>
+			</CardContent>
+		</Card>
 	);
 }
 type EntityProps = {
@@ -95,10 +98,17 @@ type EntityProps = {
 	index: number;
 	isLoading: boolean;
 };
-function EntityCard({entity, isLoading}: EntityProps) {
+function EntityCard({
+	entity,
+	isLoading,
+	index,
+	className,
+	...props
+}: EntityProps & Partial<React.ComponentProps<typeof ImageCard>>) {
 	return (
 		<ImageCard
-			className='max-w-44'
+			{...props}
+			className={cn('max-w-44', className)}
 			isLoading={isLoading || entity == null}
 			imageUrl={entity?.imageUrl}
 			alt={entity?.name ?? 'Loading'}
