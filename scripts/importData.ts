@@ -27,11 +27,11 @@ const setUrl = new URL(
 const baseCardUrl = `https://raw.githubusercontent.com/remirth/pokemon-tcg-data/master/cards/en/`;
 
 function getPokedexImage(pokedexNumber: number) {
-	return `https://static-opc.remirth.com/pokedex/${pokedexNumber}.webp`;
+	return `https://opc-static.remirth.com/pokedex/${pokedexNumber}.webp`;
 }
 
 function getCardImage(set: string, id: string, large: boolean) {
-	return `https://static-opc.remirth.com/cards/${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
+	return `https://opc-static.remirth.com/cards/${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
 }
 
 export async function importData(ctx: RepositoryContext) {

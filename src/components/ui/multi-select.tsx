@@ -116,6 +116,7 @@ export function MultiSelect({
 									<CommandItem
 										key={opt.value}
 										value={opt.value}
+										className='text-current'
 										onSelect={(currentValue) => toggleValue(currentValue)}
 									>
 										<div
