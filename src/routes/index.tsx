@@ -9,6 +9,7 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '~/components/ui/card';
@@ -136,14 +137,15 @@ function HomeComponent() {
 	}, [state.data?.length]);
 
 	return (
-		<section className='grid grid-rows-12 h-full w-full p-8 gap-4'>
-			<Card className='row-span-2 max-w-fit gap-4'>
-				<CardHeader>
+		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
+			<Card className='lg:row-span-2 row-span-3 md:max-w-80 h-full min-w-fit gap-4'>
+				<CardHeader className='hidden sm:block'>
 					<CardTitle>Pokedex</CardTitle>
 				</CardHeader>
-				<CardContent className='mx-8 max-w-80 flex flex-col gap-2 w-80'>
+				<CardContent className='md:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2'>
 					<Input
 						defaultValue={search.q}
+						className='max-w-60'
 						placeholder='Search Query...'
 						onChange={inputChanged}
 					/>
@@ -159,23 +161,16 @@ function HomeComponent() {
 					/>
 				</CardContent>
 			</Card>
-			<Card className='flex flex-col gap-4  overflow-y-auto w-full row-span-10 min-h-full'>
-				<CardHeader className='flex flex-row justify-between border-b'>
-					<CardTitle className='font-light'>
-						{pageProps.page * pageProps.pageSize} —{' '}
-						{pageProps.page * pageProps.pageSize +
-							(state.data?.length ?? pageProps.pageSize)}{' '}
-						out of {count.data ?? '...'}
-					</CardTitle>
-					<CardDescription className='flex flex-row gap-2'>
-						<PokedexPageSize pageSize={pageProps.pageSize} />
-						<PokedexPagination
-							className='mx-0 w-fit'
-							hasMore={(state.data?.length ?? 0) >= pageProps.pageSize}
-						/>
-					</CardDescription>
+			<Card className='flex flex-col gap-4 w-full row-span-10 min-h-full'>
+				<CardHeader className='md:flex flex-row justify-between border-b hidden'>
+					<CardNav
+						page={pageProps.page}
+						pageSize={pageProps.pageSize}
+						length={state.data?.length}
+						maxCount={count.data}
+					/>
 				</CardHeader>
-				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16'>
+				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit max-h-full pb-16 overflow-y-auto scrollbar'>
 					{items.map((_, i) => {
 						return (
 							<EntityCard
@@ -189,6 +184,15 @@ function HomeComponent() {
 						);
 					})}
 				</CardContent>
+
+				<CardFooter className='flex flex-row justify-between border-t md:hidden'>
+					<CardNav
+						page={pageProps.page}
+						pageSize={pageProps.pageSize}
+						length={state.data?.length}
+						maxCount={count.data}
+					/>
+				</CardFooter>
 			</Card>
 		</section>
 	);
@@ -208,7 +212,7 @@ function EntityCard({
 	return (
 		<ImageCard
 			{...props}
-			className={cn('max-w-44', className)}
+			className={cn('md:max-w-44 max-w-32', className)}
 			isLoading={isLoading || entity == null}
 			imageUrl={entity?.imageUrl}
 			alt={entity?.name ?? 'Loading'}
@@ -272,7 +276,30 @@ const PokedexPagination = ({
 	);
 };
 
-export default function PokedexPageSize({
+function CardNav(props: {
+	pageSize: number;
+	maxCount?: number;
+	length?: number;
+	page: number;
+}) {
+	const offset = props.page * props.pageSize;
+	const offsetPlusLength = offset + (props.length ?? props.pageSize);
+	const hasMore = props.maxCount != null && props.maxCount > offsetPlusLength;
+
+	return (
+		<>
+			<CardTitle className='font-light'>
+				{offset} — {offsetPlusLength} out of {props.maxCount ?? '...'}
+			</CardTitle>
+			<CardDescription className='flex flex-row gap-2'>
+				<PokedexPageSize pageSize={props.pageSize} />
+				<PokedexPagination className='mx-0 w-fit' hasMore={hasMore} />
+			</CardDescription>
+		</>
+	);
+}
+
+function PokedexPageSize({
 	pageSize,
 	...props
 }: {pageSize: number} & React.ComponentProps<typeof DropdownMenu>) {
