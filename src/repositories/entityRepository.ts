@@ -1,3 +1,4 @@
+import type {EntityKind} from 'scripts/schemas';
 import type {InsertEntity, SelectEntity} from '~/db/schema';
 import {NotInitializedError} from '~/lib/errors';
 import {BaseRepository} from './baseRepository';
@@ -63,6 +64,7 @@ export class EntityRepository extends BaseRepository {
 
 	readonly query = (
 		query?: string,
+		kind?: Array<EntityKind>,
 		page = 0,
 		pageSize = 50,
 		trx = this.db,
@@ -71,12 +73,15 @@ export class EntityRepository extends BaseRepository {
 			.select()
 			.from(this.tbl)
 			.where(
-				query
-					? this.$.or(
-							this.Q.match(this.tbl.search, query),
-							this.$.ilike(this.tbl.name, `%${query}%`),
-						)
-					: undefined,
+				this.$.and(
+					query
+						? this.$.or(
+								this.Q.match(this.tbl.search, query),
+								this.$.ilike(this.tbl.name, `%${query}%`),
+							)
+						: undefined,
+					kind ? this.$.inArray(this.tbl.entityKind, kind) : undefined,
+				),
 			)
 			.limit(pageSize)
 			.offset(page * pageSize)

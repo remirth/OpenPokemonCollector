@@ -1,11 +1,17 @@
 import {debounce} from '@tanstack/react-pacer';
 import {createFileRoute, useNavigate} from '@tanstack/react-router';
-import {type} from 'arktype';
+import {scope} from 'arktype';
 import {pascalCase} from 'change-case';
 import {ChevronDown} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button} from '~/components/ui/button';
-import {Card, CardContent, CardHeader} from '~/components/ui/card';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '~/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,6 +23,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import ImageCard from '~/components/ui/image-card';
 import {Input} from '~/components/ui/input';
+import {MultiSelect} from '~/components/ui/multi-select';
 import {
 	Pagination,
 	PaginationContent,
@@ -31,16 +38,37 @@ import {Entities} from '~/hooks/useEntities';
 import {AssertionError} from '~/lib/errors';
 import {cn, useQCFromCtx} from '~/lib/utils';
 
-const pokedexSearchSchema = type({
-	'page?': 'number.integer >= 0',
-	'pageSize?': 'number.integer >= 0',
-	'q?': 'string',
+const s = scope({
+	kind: "'pokemon'|'trainer'|'energy'",
+	kindArray: 'kind[]',
+	search: {
+		'page?': 'number.integer >= 0',
+		'pageSize?': 'number.integer >= 0',
+		'kind?': 'kind[] | kind',
+		'q?': 'string',
+	},
 });
 
+const pokedexSearchSchema = s.export('search').search;
+const kindArraySchema = s.export('kindArray').kindArray;
 type PokedexSearch = typeof pokedexSearchSchema.infer;
 
 export const Route = createFileRoute('/')({
 	component: HomeComponent,
+	search: {
+		middlewares: [
+			(ctx) => {
+				const kind = ctx.search.kind ?? ['pokemon', 'trainer', 'energy'];
+
+				return ctx.next({
+					page: (ctx.search.page ?? -1) >= 0 ? ctx.search.page : 0,
+					pageSize: (ctx.search.pageSize ?? -1) >= 0 ? ctx.search.pageSize : 50,
+					kind: Array.isArray(kind) ? kind : [kind],
+					...ctx.search,
+				});
+			},
+		],
+	},
 	validateSearch: (s: PokedexSearch): PokedexSearch =>
 		pokedexSearchSchema.assert(s),
 	loader: async (ctx) => {
@@ -49,6 +77,7 @@ export const Route = createFileRoute('/')({
 
 		await Entities.load(queryClient, {
 			query: search.q,
+			kind: kindArraySchema.assert(search.kind),
 			page: search.page ?? 0,
 			pageSize: search.pageSize ?? 50,
 		});
@@ -56,6 +85,12 @@ export const Route = createFileRoute('/')({
 });
 
 const api = Route;
+
+const MULTI_SELECT_OPTIONS = [
+	{label: 'Pokémon', value: 'pokemon'},
+	{label: 'Trainer', value: 'trainer'},
+	{label: 'Energy', value: 'energy'},
+];
 
 function usePokedexForm() {
 	const nav = api.useNavigate();
@@ -68,6 +103,13 @@ function usePokedexForm() {
 				},
 				{key: 'navigate', wait: 300},
 			),
+			multiSelectChanged: debounce(
+				(lst: string[]) => {
+					const kind = kindArraySchema.assert(lst);
+					nav({search: (prev) => ({...prev, kind})});
+				},
+				{key: 'navigate', wait: 1000},
+			),
 		}),
 		[nav],
 	);
@@ -77,8 +119,12 @@ function HomeComponent() {
 	const search = api.useSearch();
 
 	const pageSize = search.pageSize ?? 50;
+	const page = search.page ?? 0;
+
+	const kind = kindArraySchema.assert(search.kind);
 	const state = Entities.useEntities({
 		query: search.q,
+		kind,
 		page: search.page ?? 0,
 		pageSize,
 	});
@@ -88,7 +134,7 @@ function HomeComponent() {
 		[pageSize],
 	);
 
-	const {inputChanged} = usePokedexForm();
+	const {inputChanged, multiSelectChanged} = usePokedexForm();
 	const [lastLength, updateLastLength] = useState(pageSize);
 	useEffect(() => {
 		state.data?.length != null && updateLastLength(state.data.length);
@@ -96,16 +142,41 @@ function HomeComponent() {
 
 	return (
 		<section className='grid grid-rows-12 h-full w-full p-8 gap-4'>
-			<Card className='row-span-2'>
-				<Input defaultValue={search.q} onChange={inputChanged}></Input>
+			<Card className='row-span-2 max-w-fit gap-4'>
+				<CardHeader>
+					<CardTitle>Pokedex</CardTitle>
+				</CardHeader>
+				<CardContent className='mx-8 max-w-80 flex flex-col gap-2 w-80'>
+					<Input
+						defaultValue={search.q}
+						placeholder='Search Query...'
+						onChange={inputChanged}
+					/>
+					<MultiSelect
+						searchable={false}
+						onValueChange={multiSelectChanged}
+						buttonClassName='max-w-60 min-w-40 bg-neutral text-foreground'
+						commandClassName='bg-background text-foreground'
+						className='max-w-40'
+						buttonVariant='noShadow'
+						options={MULTI_SELECT_OPTIONS}
+						defaultValue={kind}
+					/>
+				</CardContent>
 			</Card>
 			<Card className='flex flex-col gap-4  overflow-y-auto w-full row-span-10 min-h-full'>
-				<CardHeader className='flex flex-row gap-2'>
-					<PokedexPageSize pageSize={pageSize} />
-					<PokedexPagination
-						className='mx-0 w-fit'
-						hasMore={(state.data?.length ?? 0) >= pageSize}
-					/>
+				<CardHeader className='flex flex-row justify-between border-b'>
+					<CardTitle className='font-light'>
+						{page * pageSize} —{' '}
+						{page * pageSize + (state.data?.length ?? pageSize)} out of 1000
+					</CardTitle>
+					<CardDescription className='flex flex-row gap-2'>
+						<PokedexPageSize pageSize={pageSize} />
+						<PokedexPagination
+							className='mx-0 w-fit'
+							hasMore={(state.data?.length ?? 0) >= pageSize}
+						/>
+					</CardDescription>
 				</CardHeader>
 				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16'>
 					{items.map((_, i) => {
@@ -221,17 +292,14 @@ export default function PokedexPageSize({
 	return (
 		<DropdownMenu {...props}>
 			<DropdownMenuTrigger asChild>
-				<Button
-					className='bg-secondary-background text-foreground'
-					variant='noShadow'
-				>
+				<Button className='bg-background text-foreground' variant='noShadow'>
 					{pageSize}
 					<ChevronDown />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
 				align='start'
-				className='w-20 bg-secondary-background text-foreground'
+				className='w-20 bg-background text-foreground'
 			>
 				<DropdownMenuLabel inset>Page Size</DropdownMenuLabel>
 				<DropdownMenuGroup>

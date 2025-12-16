@@ -30,6 +30,8 @@ export type MultiSelectProps = {
 	emptyLabel?: string;
 	className?: string;
 	buttonClassName?: string;
+	commandClassName?: string;
+	searchable?: boolean;
 	buttonVariant?: React.ComponentProps<typeof Button>['variant'];
 	disabled?: boolean;
 };
@@ -42,6 +44,8 @@ export function MultiSelect({
 	placeholder = 'Select items...',
 	searchPlaceholder = 'Search...',
 	emptyLabel = 'No results found.',
+	searchable = true,
+	commandClassName,
 	className,
 	buttonClassName,
 	buttonVariant = 'noShadow',
@@ -92,10 +96,20 @@ export function MultiSelect({
 				align='start'
 			>
 				<Command className='**:data-[slot=command-input-wrapper]:h-11'>
-					<CommandInput placeholder={searchPlaceholder} />
+					{searchable && (
+						<CommandInput
+							placeholder={searchPlaceholder}
+							className={commandClassName}
+						/>
+					)}
 					<CommandList>
 						<CommandEmpty>{emptyLabel}</CommandEmpty>
-						<CommandGroup className='p-2 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-col [&_[cmdk-group-items]]:gap-1'>
+						<CommandGroup
+							className={cn(
+								'p-2 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-col [&_[cmdk-group-items]]:gap-1',
+								commandClassName,
+							)}
+						>
 							{options.map((opt) => {
 								const isSelected = selectedValues.includes(opt.value);
 								return (
