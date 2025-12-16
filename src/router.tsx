@@ -14,7 +14,7 @@ export function makeQueryClient() {
 					console.error({query: query.queryHash, error});
 					return false;
 				},
-				gcTime: 1000 * 60 * 60 * 24 * 7,
+				gcTime: 30_000,
 			},
 		},
 	});
@@ -24,14 +24,7 @@ export function makeRouter(queryClient: QueryClient, initialUrl?: string) {
 	const router = createRouter({
 		routeTree,
 		defaultPreload: 'intent',
-		defaultViewTransition: {
-			types: ({fromLocation, toLocation}) => {
-				const fromIndex = fromLocation?.state?.__TSR_index ?? 0;
-				const toIndex = toLocation?.state?.__TSR_index ?? fromIndex;
-				const direction = fromIndex > toIndex ? 'right' : 'left';
-				return [`hypr-slide-${direction}`, 'micro-blur'];
-			},
-		},
+		defaultViewTransition: false,
 		scrollRestoration: true,
 		context: {queryClient},
 		history: initialUrl
