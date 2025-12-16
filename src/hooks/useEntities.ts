@@ -4,10 +4,24 @@ import type {EntityKind} from 'scripts/schemas';
 import {RepositoryContext} from '~/repositories';
 
 export namespace Entities {
+	export type UseEntitiesProps = {
+		page: number;
+		pageSize: number;
+		kind: Array<EntityKind>;
+		query?: string;
+	};
+
+	export type UseEntityCountProps = Omit<UseEntitiesProps, 'page' | 'pageSize'>;
+
 	export async function load(client: QueryClient, props: UseEntitiesProps) {
 		await client.ensureQueryData({
 			queryKey: createEntitiesKey(props),
 			queryFn: () => fetchEntities(props),
+		});
+
+		await client.ensureQueryData({
+			queryKey: createEntityCountKey(props),
+			queryFn: () => fetchEntityCount(props),
 		});
 	}
 
@@ -19,18 +33,11 @@ export namespace Entities {
 		props.kind?.join(';') ?? '',
 	];
 
-	export type UseEntitiesProps = {
-		page: number;
-		pageSize: number;
-		kind: Array<EntityKind>;
-		query?: string;
-	};
-	export function useEntities(props: UseEntitiesProps) {
-		return useQuery({
-			queryKey: createEntitiesKey(props),
-			queryFn: () => fetchEntities(props),
-		});
-	}
+	export const createEntityCountKey = (props: UseEntityCountProps) => [
+		'entityCount',
+		props.query ?? 'EMPTY',
+		props.kind?.join(';') ?? '',
+	];
 
 	async function fetchEntities(props: UseEntitiesProps) {
 		const ctx = await RepositoryContext.get();
@@ -40,5 +47,24 @@ export namespace Entities {
 			props.page,
 			props.pageSize,
 		);
+	}
+
+	async function fetchEntityCount(props: UseEntityCountProps) {
+		const ctx = await RepositoryContext.get();
+		return ctx.entities.queryCount(props.query, props.kind);
+	}
+
+	export function useEntities(props: UseEntitiesProps) {
+		return useQuery({
+			queryKey: createEntitiesKey(props),
+			queryFn: () => fetchEntities(props),
+		});
+	}
+
+	export function useEntityCount(props: UseEntityCountProps) {
+		return useQuery({
+			queryKey: createEntityCountKey(props),
+			queryFn: () => fetchEntityCount(props),
+		});
 	}
 }

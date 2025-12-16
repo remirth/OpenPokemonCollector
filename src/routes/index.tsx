@@ -118,24 +118,25 @@ function usePokedexForm() {
 function HomeComponent() {
 	const search = api.useSearch();
 
-	const pageSize = search.pageSize ?? 50;
-	const page = search.page ?? 0;
-
-	const kind = kindArraySchema.assert(search.kind);
-	const state = Entities.useEntities({
-		query: search.q,
-		kind,
-		page: search.page ?? 0,
-		pageSize,
-	});
+	const pageProps: Entities.UseEntitiesProps = useMemo(
+		() => ({
+			page: search.page ?? 0,
+			kind: kindArraySchema.assert(search.kind),
+			pageSize: search.pageSize ?? 50,
+			query: search.q,
+		}),
+		[search.page, search.kind, search.pageSize, search.q],
+	);
+	const state = Entities.useEntities(pageProps);
+	const count = Entities.useEntityCount(pageProps);
 
 	const items = useMemo(
-		() => Array.from({length: pageSize}).fill(0),
-		[pageSize],
+		() => Array.from({length: pageProps.pageSize}).fill(0),
+		[pageProps.pageSize],
 	);
 
 	const {inputChanged, multiSelectChanged} = usePokedexForm();
-	const [lastLength, updateLastLength] = useState(pageSize);
+	const [lastLength, updateLastLength] = useState(pageProps.pageSize);
 	useEffect(() => {
 		state.data?.length != null && updateLastLength(state.data.length);
 	}, [state.data?.length]);
@@ -160,21 +161,23 @@ function HomeComponent() {
 						className='max-w-40'
 						buttonVariant='noShadow'
 						options={MULTI_SELECT_OPTIONS}
-						defaultValue={kind}
+						defaultValue={pageProps.kind}
 					/>
 				</CardContent>
 			</Card>
 			<Card className='flex flex-col gap-4  overflow-y-auto w-full row-span-10 min-h-full'>
 				<CardHeader className='flex flex-row justify-between border-b'>
 					<CardTitle className='font-light'>
-						{page * pageSize} —{' '}
-						{page * pageSize + (state.data?.length ?? pageSize)} out of 1000
+						{pageProps.page * pageProps.pageSize} —{' '}
+						{pageProps.page * pageProps.pageSize +
+							(state.data?.length ?? pageProps.pageSize)}{' '}
+						out of {count.data ?? '...'}
 					</CardTitle>
 					<CardDescription className='flex flex-row gap-2'>
-						<PokedexPageSize pageSize={pageSize} />
+						<PokedexPageSize pageSize={pageProps.pageSize} />
 						<PokedexPagination
 							className='mx-0 w-fit'
-							hasMore={(state.data?.length ?? 0) >= pageSize}
+							hasMore={(state.data?.length ?? 0) >= pageProps.pageSize}
 						/>
 					</CardDescription>
 				</CardHeader>

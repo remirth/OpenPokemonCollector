@@ -93,4 +93,26 @@ export class EntityRepository extends BaseRepository {
 				this.$.asc(this.tbl.name),
 			);
 	};
+
+	readonly queryCount = (
+		query?: string,
+		kind?: Array<EntityKind>,
+		trx = this.db,
+	): Promise<number> => {
+		return trx
+			.select({count: this.$.count()})
+			.from(this.tbl)
+			.where(
+				this.$.and(
+					query
+						? this.$.or(
+								this.Q.match(this.tbl.search, query),
+								this.$.ilike(this.tbl.name, `%${query}%`),
+							)
+						: undefined,
+					kind ? this.$.inArray(this.tbl.entityKind, kind) : undefined,
+				),
+			)
+			.then(this.R.piped(this.assertFirst('Row count'), this.R.prop('count')));
+	};
 }
