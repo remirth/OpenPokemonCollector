@@ -109,7 +109,7 @@ export class RepositoryContext {
 		const ctx = DB.createDbContext(engine);
 		const shouldMigrate = DB.shouldMigrate();
 		if (shouldMigrate) {
-			await DB.migrateDatabase(ctx);
+			await DB.migrateDatabase(ctx, engine);
 			DB.updatePerformedMigrations();
 		}
 

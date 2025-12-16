@@ -1,4 +1,5 @@
 import * as $ from 'drizzle-orm';
+import type {PgColumn} from 'drizzle-orm/pg-core';
 import * as R from 'remeda';
 import type {DB} from '~/db';
 import {NotInitializedError} from '~/lib/errors';
@@ -17,11 +18,23 @@ export abstract class BaseRepository {
 		this.T = ctx.tables;
 	}
 
-	protected assertFirst = <T>(name: string) => {
+	protected readonly assertFirst = <T>(name: string) => {
 		return (rows: Array<T>) => NotInitializedError.test(name, rows[0]);
 	};
 
-	protected assert = <T>(name: string) => {
+	protected readonly assert = <T>(name: string) => {
 		return (value: T) => NotInitializedError.test(name, value);
+	};
+
+	protected readonly Q = {
+		toTSQ: (q: string) => this.$.sql`ngram_tsquery(${q})`,
+		match: <T extends $.ColumnBaseConfig<$.ColumnDataType, string>>(
+			col: PgColumn<T>,
+			q: string,
+		) => this.$.sql`${col} @@ ${this.Q.toTSQ(q)}`,
+		rankDesc: <T extends $.ColumnBaseConfig<$.ColumnDataType, string>>(
+			col: PgColumn<T>,
+			q: string,
+		) => this.$.sql`ts_rank_cd(${col}, ${this.Q.toTSQ(q)}) DESC`,
 	};
 }

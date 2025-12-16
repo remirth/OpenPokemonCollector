@@ -1,5 +1,5 @@
 {
-	"id": "971e395a-7e1b-4ab1-a1cb-98d1e35ad6ef",
+	"id": "66122f23-902c-4c20-ad2b-4388e7ae79f4",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -30,6 +30,16 @@
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
+				},
+				"search": {
+					"name": "search",
+					"type": "tsvector",
+					"primaryKey": false,
+					"notNull": false,
+					"generated": {
+						"as": "public.to_ngrams3(coalesce(name, ''))",
+						"type": "stored"
+					}
 				}
 			},
 			"indexes": {
@@ -46,6 +56,21 @@
 					"isUnique": true,
 					"concurrently": false,
 					"method": "btree",
+					"with": {}
+				},
+				"artists_search_idx": {
+					"name": "artists_search_idx",
+					"columns": [
+						{
+							"expression": "search",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
 					"with": {}
 				}
 			},
@@ -130,6 +155,16 @@
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
+				},
+				"search": {
+					"name": "search",
+					"type": "tsvector",
+					"primaryKey": false,
+					"notNull": false,
+					"generated": {
+						"as": "public.to_ngrams3(coalesce(name, ''))",
+						"type": "stored"
+					}
 				}
 			},
 			"indexes": {
@@ -191,6 +226,36 @@
 					"isUnique": false,
 					"concurrently": false,
 					"method": "btree",
+					"with": {}
+				},
+				"card_name_idx": {
+					"name": "card_name_idx",
+					"columns": [
+						{
+							"expression": "name",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"card_search_idx": {
+					"name": "card_search_idx",
+					"columns": [
+						{
+							"expression": "search",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
 					"with": {}
 				}
 			},
@@ -440,6 +505,16 @@
 					"primaryKey": false,
 					"notNull": false,
 					"default": true
+				},
+				"search": {
+					"name": "search",
+					"type": "tsvector",
+					"primaryKey": false,
+					"notNull": false,
+					"generated": {
+						"as": "public.to_ngrams3(coalesce(name, ''))",
+						"type": "stored"
+					}
 				}
 			},
 			"indexes": {
@@ -486,6 +561,21 @@
 					"isUnique": false,
 					"concurrently": false,
 					"method": "btree",
+					"with": {}
+				},
+				"collections_search_idx": {
+					"name": "collections_search_idx",
+					"columns": [
+						{
+							"expression": "search",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
 					"with": {}
 				}
 			},
@@ -655,7 +745,7 @@
 					"primaryKey": false,
 					"notNull": false,
 					"generated": {
-						"as": "setweight(to_tsvector('simple', coalesce(\"entities\".\"name\", '')), 'A')",
+						"as": "public.to_ngrams3(coalesce(name, ''))",
 						"type": "stored"
 					}
 				}
@@ -919,6 +1009,16 @@
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
+				},
+				"search": {
+					"name": "search",
+					"type": "tsvector",
+					"primaryKey": false,
+					"notNull": false,
+					"generated": {
+						"as": "public.to_ngrams3(coalesce(name, ''))",
+						"type": "stored"
+					}
 				}
 			},
 			"indexes": {
@@ -950,6 +1050,21 @@
 					"isUnique": true,
 					"concurrently": false,
 					"method": "btree",
+					"with": {}
+				},
+				"sets_search_idx": {
+					"name": "sets_search_idx",
+					"columns": [
+						{
+							"expression": "search",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
 					"with": {}
 				}
 			},

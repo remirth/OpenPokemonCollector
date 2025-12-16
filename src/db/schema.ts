@@ -24,8 +24,7 @@ export const entityTable = SQL.pgTable(
 		pokedexNumber: SQL.integer('pokedex_number').unique(),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
 		search: tsvector('search').generatedAlwaysAs(
-			(): SQLStatement =>
-				sql`setweight(to_tsvector('simple', coalesce(${entityTable.name}, '')), 'A')`,
+			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
 		),
 	},
 	(tbl) => {
@@ -46,7 +45,7 @@ export const entityTable = SQL.pgTable(
 export const InsertEntitySchema = createInsertSchema(entityTable);
 export const SelectEntitySchema = createSelectSchema(entityTable);
 export type InsertEntity = typeof InsertEntitySchema.infer;
-export type SelectEntity = typeof SelectEntitySchema.infer;
+export type SelectEntity = typeof SelectEntitySchema.infer & {id: number};
 
 export const subtypeTable = SQL.pgTable(
 	'subtypes',
@@ -105,9 +104,15 @@ export const artistTable = SQL.pgTable(
 	{
 		id: SQL.integer('id').primaryKey().generatedAlwaysAsIdentity(),
 		name: SQL.varchar('name', {length: 255}).notNull().unique(),
+		search: tsvector('search').generatedAlwaysAs(
+			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
+		),
 	},
 	(tbl) => {
-		return [SQL.uniqueIndex('artists_name_idx').on(tbl.name)];
+		return [
+			SQL.uniqueIndex('artists_name_idx').on(tbl.name),
+			SQL.index('artists_search_idx').using('gin', tbl.search),
+		];
 	},
 );
 
@@ -130,11 +135,15 @@ export const setTable = SQL.pgTable(
 		imageSymbol: SQL.varchar('image_symbol', {length: 255}).notNull(),
 		imageLogo: SQL.varchar('image_logo', {length: 255}).notNull(),
 		externalId: SQL.varchar('external_id', {length: 255}).notNull().unique(),
+		search: tsvector('search').generatedAlwaysAs(
+			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
+		),
 	},
 	(tbl) => {
 		return [
 			SQL.uniqueIndex('sets_name_idx').on(tbl.name),
 			SQL.uniqueIndex('sets_external_idx').on(tbl.externalId),
+			SQL.index('sets_search_idx').using('gin', tbl.search),
 		];
 	},
 );
@@ -158,6 +167,9 @@ export const cardTable = SQL.pgTable(
 		numberInSet: SQL.varchar('number_in_set', {length: 255}),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
 		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}).notNull(),
+		search: tsvector('search').generatedAlwaysAs(
+			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
+		),
 	},
 	(tbl) => {
 		return [
@@ -165,6 +177,8 @@ export const cardTable = SQL.pgTable(
 			SQL.index('card_rarity_idx').on(tbl.rarityId),
 			SQL.index('card_set_idx').on(tbl.setId),
 			SQL.index('card_artist_idx').on(tbl.artistId),
+			SQL.index('card_name_idx').on(tbl.name),
+			SQL.index('card_search_idx').using('gin', tbl.search),
 		];
 	},
 );
@@ -182,12 +196,16 @@ export const collectionTable = SQL.pgTable(
 		updatedAt: SQL.date('updated_at').defaultNow(),
 		createdAt: SQL.date('created_at').defaultNow(),
 		active: SQL.boolean('active').default(true),
+		search: tsvector('search').generatedAlwaysAs(
+			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
+		),
 	},
 	(tbl) => {
 		return [
 			SQL.uniqueIndex('collections_name_idx').on(tbl.name),
 			SQL.index('collections_updated_idx').on(tbl.updatedAt),
 			SQL.index('collections_created_idx').on(tbl.createdAt),
+			SQL.index('collections_search_idx').using('gin', tbl.search),
 		];
 	},
 );

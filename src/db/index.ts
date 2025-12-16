@@ -2,6 +2,7 @@ import {migrate} from '@proj-airi/drizzle-orm-browser-migrator/pglite';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 import {NotInitializedError} from '~/lib/errors';
 import {stringArray} from '~/schemas/shared';
+import {CustomMigrations} from './customMigrations';
 import * as schema from './schema';
 
 type Migration =
@@ -85,8 +86,13 @@ export namespace DB {
 	}
 
 	export let migrations: Migration[] | undefined;
-	export async function migrateDatabase(ctx: DatabaseContext) {
+	export async function migrateDatabase(
+		ctx: DatabaseContext,
+		engine: DatabaseEngine,
+	) {
 		NotInitializedError.assert('Migrations not loaded', migrations);
+		await engine.query(CustomMigrations.sqlToNgrams3);
+		await engine.query(CustomMigrations.sqlNgramTsquery);
 		await migrate(ctx, migrations);
 	}
 

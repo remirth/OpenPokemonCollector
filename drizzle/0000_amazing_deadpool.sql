@@ -2,6 +2,7 @@ CREATE TYPE "public"."entity_kind_enum" AS ENUM('pokemon', 'energy', 'trainer');
 CREATE TABLE "artists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "artists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
+	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "artists_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -15,6 +16,7 @@ CREATE TABLE "cards" (
 	"number_in_set" varchar(255),
 	"image_url" varchar(255) NOT NULL,
 	"image_large_url" varchar(255) NOT NULL,
+	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "cards_external_id_unique" UNIQUE("external_id")
 );
 --> statement-breakpoint
@@ -33,6 +35,7 @@ CREATE TABLE "collections" (
 	"updated_at" date DEFAULT now(),
 	"created_at" date DEFAULT now(),
 	"active" boolean DEFAULT true,
+	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "collections_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -51,7 +54,7 @@ CREATE TABLE "entities" (
 	"entity_kind" "entity_kind_enum" NOT NULL,
 	"pokedex_number" integer,
 	"image_url" varchar(255) NOT NULL,
-	"search" "tsvector" GENERATED ALWAYS AS (setweight(to_tsvector('simple', coalesce("entities"."name", '')), 'A')) STORED,
+	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "entities_name_unique" UNIQUE("name"),
 	CONSTRAINT "entities_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "entities_pokedex_number_unique" UNIQUE("pokedex_number")
@@ -75,6 +78,7 @@ CREATE TABLE "sets" (
 	"image_symbol" varchar(255) NOT NULL,
 	"image_logo" varchar(255) NOT NULL,
 	"external_id" varchar(255) NOT NULL,
+	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "sets_name_unique" UNIQUE("name"),
 	CONSTRAINT "sets_external_id_unique" UNIQUE("external_id")
 );
@@ -116,10 +120,13 @@ ALTER TABLE "subtype_relations" ADD CONSTRAINT "subtype_relations_card_id_cards_
 ALTER TABLE "type_relations" ADD CONSTRAINT "type_relations_type_id_types_id_fk" FOREIGN KEY ("type_id") REFERENCES "public"."types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "type_relations" ADD CONSTRAINT "type_relations_card_id_cards_id_fk" FOREIGN KEY ("card_id") REFERENCES "public"."cards"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "artists_name_idx" ON "artists" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "artists_search_idx" ON "artists" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "card_external_idx" ON "cards" USING btree ("external_id");--> statement-breakpoint
 CREATE INDEX "card_rarity_idx" ON "cards" USING btree ("rarity_id");--> statement-breakpoint
 CREATE INDEX "card_set_idx" ON "cards" USING btree ("set_id");--> statement-breakpoint
 CREATE INDEX "card_artist_idx" ON "cards" USING btree ("artist_id");--> statement-breakpoint
+CREATE INDEX "card_name_idx" ON "cards" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "card_search_idx" ON "cards" USING gin ("search");--> statement-breakpoint
 CREATE INDEX "collection_entry_idx" ON "collection_entries" USING btree ("collection_id");--> statement-breakpoint
 CREATE INDEX "collection_entry_card_idx" ON "collection_entries" USING btree ("card_id");--> statement-breakpoint
 CREATE INDEX "collection_quantity_idx" ON "collection_entries" USING btree ("quantity");--> statement-breakpoint
@@ -128,6 +135,7 @@ CREATE INDEX "collection_entry_created_idx" ON "collection_entries" USING btree 
 CREATE UNIQUE INDEX "collections_name_idx" ON "collections" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "collections_updated_idx" ON "collections" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX "collections_created_idx" ON "collections" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "collections_search_idx" ON "collections" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "entity_relation_idx" ON "entity_relations" USING btree ("card_id","entity_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "entity_name_idx" ON "entities" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "entity_slug_idx" ON "entities" USING btree ("slug");--> statement-breakpoint
@@ -138,6 +146,7 @@ CREATE INDEX "entity_search_idx" ON "entities" USING gin ("search");--> statemen
 CREATE UNIQUE INDEX "rarities_name_idx" ON "rarities" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "sets_name_idx" ON "sets" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "sets_external_idx" ON "sets" USING btree ("external_id");--> statement-breakpoint
+CREATE INDEX "sets_search_idx" ON "sets" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "subtypes_name_idx" ON "subtypes" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "subtype_kind_idx" ON "subtypes" USING btree ("entity_kind");--> statement-breakpoint
 CREATE UNIQUE INDEX "subtype_relation_idx" ON "subtype_relations" USING btree ("card_id","subtype_id");--> statement-breakpoint

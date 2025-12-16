@@ -1,8 +1,9 @@
+import {debounce} from '@tanstack/react-pacer';
 import {createFileRoute, useNavigate} from '@tanstack/react-router';
 import {type} from 'arktype';
 import {pascalCase} from 'change-case';
 import {ChevronDown} from 'lucide-react';
-import {useCallback, useMemo} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button} from '~/components/ui/button';
 import {Card, CardContent, CardHeader} from '~/components/ui/card';
 import {
@@ -15,6 +16,7 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import ImageCard from '~/components/ui/image-card';
+import {Input} from '~/components/ui/input';
 import {
 	Pagination,
 	PaginationContent,
@@ -32,6 +34,7 @@ import {cn, useQCFromCtx} from '~/lib/utils';
 const pokedexSearchSchema = type({
 	'page?': 'number.integer >= 0',
 	'pageSize?': 'number.integer >= 0',
+	'q?': 'string',
 });
 
 type PokedexSearch = typeof pokedexSearchSchema.infer;
@@ -45,6 +48,7 @@ export const Route = createFileRoute('/')({
 		const search = pokedexSearchSchema.assert(ctx.location.search);
 
 		await Entities.load(queryClient, {
+			query: search.q,
 			page: search.page ?? 0,
 			pageSize: search.pageSize ?? 50,
 		});
@@ -53,11 +57,28 @@ export const Route = createFileRoute('/')({
 
 const api = Route;
 
+function usePokedexForm() {
+	const nav = api.useNavigate();
+
+	return useMemo(
+		() => ({
+			inputChanged: debounce(
+				(e: React.ChangeEvent<HTMLInputElement>) => {
+					nav({search: (prev) => ({...prev, q: e.target.value})});
+				},
+				{key: 'navigate', wait: 300},
+			),
+		}),
+		[nav],
+	);
+}
+
 function HomeComponent() {
 	const search = api.useSearch();
 
 	const pageSize = search.pageSize ?? 50;
 	const state = Entities.useEntities({
+		query: search.q,
 		page: search.page ?? 0,
 		pageSize,
 	});
@@ -67,10 +88,18 @@ function HomeComponent() {
 		[pageSize],
 	);
 
+	const {inputChanged} = usePokedexForm();
+	const [lastLength, updateLastLength] = useState(pageSize);
+	useEffect(() => {
+		state.data?.length != null && updateLastLength(state.data.length);
+	}, [state.data?.length]);
+
 	return (
 		<section className='grid grid-rows-12 h-full w-full p-8 gap-4'>
-			<Card className='row-span-2'></Card>
-			<Card className='max-w-fit flex flex-col gap-4  overflow-y-auto w-full row-span-10'>
+			<Card className='row-span-2'>
+				<Input defaultValue={search.q} onChange={inputChanged}></Input>
+			</Card>
+			<Card className='flex flex-col gap-4  overflow-y-auto w-full row-span-10 min-h-full'>
 				<CardHeader className='flex flex-row gap-2'>
 					<PokedexPageSize pageSize={pageSize} />
 					<PokedexPagination
@@ -78,16 +107,16 @@ function HomeComponent() {
 						hasMore={(state.data?.length ?? 0) >= pageSize}
 					/>
 				</CardHeader>
-				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16 max-w-fit'>
+				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit pb-16'>
 					{items.map((_, i) => {
 						return (
 							<EntityCard
-								// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid rerender on load
+								// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid full repaint
 								key={i}
 								entity={state.data?.[i]}
 								isLoading={state.isLoading}
 								index={i}
-								className={cn(state.data && i >= state.data.length && 'hidden')}
+								className={cn(i >= lastLength && 'hidden')}
 							/>
 						);
 					})}

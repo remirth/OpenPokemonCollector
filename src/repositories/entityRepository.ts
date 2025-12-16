@@ -4,8 +4,6 @@ import {BaseRepository} from './baseRepository';
 
 export class EntityRepository extends BaseRepository {
 	private readonly tbl = this.T.entityTable;
-	private readonly relations = this.T.entityRelationTable;
-	private readonly cards = this.T.cardTable;
 
 	readonly createUnique = async (
 		payload: InsertEntity,
@@ -54,7 +52,7 @@ export class EntityRepository extends BaseRepository {
 		page = 0,
 		pageSize = 50,
 		trx = this.db,
-	): Promise<Array<SelectEntity & {id: number}>> => {
+	): Promise<Array<SelectEntity>> => {
 		return trx
 			.select()
 			.from(this.tbl)
@@ -63,25 +61,31 @@ export class EntityRepository extends BaseRepository {
 			.orderBy(this.$.asc(this.tbl.pokedexNumber));
 	};
 
-	readonly getCardImageForEntity = (entityId: number, trx = this.db) => {
+	readonly query = (
+		query?: string,
+		page = 0,
+		pageSize = 50,
+		trx = this.db,
+	): Promise<Array<SelectEntity>> => {
 		return trx
-			.select({image: this.cards.imageLargeUrl})
+			.select()
 			.from(this.tbl)
-			.leftJoin(this.relations, this.$.eq(this.tbl.id, this.relations.entityId))
-			.leftJoin(this.cards, this.$.eq(this.cards.id, this.relations.cardId))
 			.where(
-				this.$.and(
-					this.$.eq(this.tbl.id, entityId),
-					this.$.isNotNull(this.cards.imageLargeUrl),
-				),
+				query
+					? this.$.or(
+							this.Q.match(this.tbl.search, query),
+							this.$.ilike(this.tbl.name, `%${query}%`),
+						)
+					: undefined,
 			)
-			.limit(1)
-			.then(
-				this.R.piped(
-					this.assertFirst(`Card Image for entityId: ${entityId}`),
-					this.R.prop('image'),
-					this.assert(`Card image for entityId: ${entityId}`),
-				),
+			.limit(pageSize)
+			.offset(page * pageSize)
+			.orderBy(
+				query
+					? this.Q.rankDesc(this.tbl.search, query)
+					: this.$.asc(this.tbl.pokedexNumber),
+				this.$.asc(this.tbl.pokedexNumber),
+				this.$.asc(this.tbl.name),
 			);
 	};
 }

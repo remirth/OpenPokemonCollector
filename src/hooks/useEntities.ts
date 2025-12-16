@@ -12,11 +12,16 @@ export namespace Entities {
 
 	export const createEntitiesKey = (props: UseEntitiesProps) => [
 		'entities',
+		props.query ?? 'EMPTY',
 		props.page,
 		props.pageSize,
 	];
 
-	export type UseEntitiesProps = {page: number; pageSize: number};
+	export type UseEntitiesProps = {
+		page: number;
+		pageSize: number;
+		query?: string;
+	};
 	export function useEntities(props: UseEntitiesProps) {
 		return useQuery({
 			queryKey: createEntitiesKey(props),
@@ -26,6 +31,6 @@ export namespace Entities {
 
 	async function fetchEntities(props: UseEntitiesProps) {
 		const ctx = await RepositoryContext.get();
-		return ctx.entities.getPage(props.page, props.pageSize);
+		return ctx.entities.query(props.query, props.page, props.pageSize);
 	}
 }
