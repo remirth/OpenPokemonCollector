@@ -55,20 +55,6 @@ type PokedexSearch = typeof pokedexSearchSchema.infer;
 
 export const Route = createFileRoute('/')({
 	component: HomeComponent,
-	search: {
-		middlewares: [
-			(ctx) => {
-				const kind = ctx.search.kind ?? ['pokemon', 'trainer', 'energy'];
-
-				return ctx.next({
-					page: (ctx.search.page ?? -1) >= 0 ? ctx.search.page : 0,
-					pageSize: (ctx.search.pageSize ?? -1) >= 0 ? ctx.search.pageSize : 50,
-					kind: Array.isArray(kind) ? kind : [kind],
-					...ctx.search,
-				});
-			},
-		],
-	},
 	validateSearch: (s: PokedexSearch): PokedexSearch =>
 		pokedexSearchSchema.assert(s),
 	loader: async (ctx) => {
@@ -77,9 +63,13 @@ export const Route = createFileRoute('/')({
 
 		await Entities.load(queryClient, {
 			query: search.q,
-			kind: kindArraySchema.assert(search.kind),
 			page: search.page ?? 0,
 			pageSize: search.pageSize ?? 50,
+			kind: search.kind
+				? kindArraySchema.assert(
+						Array.isArray(search.kind) ? search.kind : [search.kind],
+					)
+				: ['pokemon', 'energy', 'trainer'],
 		});
 	},
 });
@@ -121,11 +111,15 @@ function HomeComponent() {
 	const pageProps: Entities.UseEntitiesProps = useMemo(
 		() => ({
 			page: search.page ?? 0,
-			kind: kindArraySchema.assert(search.kind),
 			pageSize: search.pageSize ?? 50,
 			query: search.q,
+			kind: search.kind
+				? kindArraySchema.assert(
+						Array.isArray(search.kind) ? search.kind : [search.kind],
+					)
+				: ['pokemon', 'energy', 'trainer'],
 		}),
-		[search.page, search.kind, search.pageSize, search.q],
+		[search.page, search.pageSize, search.q, search.kind],
 	);
 	const state = Entities.useEntities(pageProps);
 	const count = Entities.useEntityCount(pageProps);

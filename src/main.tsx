@@ -21,15 +21,9 @@ const router = makeRouter(queryClient);
 
 await addPersistence(queryClient);
 
-const element = import.meta.env.DEV ? (
-	<RouterProvider router={router} />
-) : (
-	<RouterClient router={router} />
-);
-
 if (rootElement.hasChildNodes()) {
-	hydrateRoot(rootElement, element);
+	hydrateRoot(rootElement, <RouterClient router={router} />);
 } else {
 	const root = ReactDOM.createRoot(rootElement);
-	root.render(element);
+	root.render(<RouterProvider router={router} />);
 }
