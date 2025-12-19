@@ -1,0 +1,22 @@
+import {useRouterState} from '@tanstack/react-router';
+import {useEffect, useRef} from 'react';
+import LoadingBar, {type LoadingBarRef} from 'react-top-loading-bar';
+import {useCssVar} from '~/hooks/useCssVar';
+
+export function Loader() {
+	const color = useCssVar('--main');
+	const ref = useRef<LoadingBarRef>(null);
+	const {isLoading} = useRouterState({
+		select: (s) => ({isLoading: s.status === 'pending'}),
+	});
+
+	useEffect(() => {
+		if (isLoading) {
+			ref.current?.continuousStart();
+		} else {
+			ref.current?.complete();
+		}
+	}, [isLoading]);
+
+	return <LoadingBar color={color} height={3} shadow ref={ref} />;
+}
