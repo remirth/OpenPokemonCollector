@@ -99,7 +99,7 @@ function usePokedexForm() {
 					const kind = kindArraySchema.assert(lst);
 					nav({search: (prev) => ({...prev, kind})});
 				},
-				{key: 'navigate', wait: 1000},
+				{key: 'navigate', wait: 300},
 			),
 		}),
 		[nav],
@@ -162,7 +162,7 @@ function HomeComponent() {
 				</CardContent>
 			</Card>
 			<Card className='flex flex-col gap-4 w-full row-span-10 min-h-full'>
-				<CardHeader className='md:flex flex-row justify-between border-b hidden'>
+				<CardHeader className='md:flex flex-row justify-between border-b hidden pb-4!'>
 					<CardNav
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
@@ -212,12 +212,19 @@ function EntityCard({
 	className,
 	...props
 }: EntityProps & Partial<React.ComponentProps<typeof ImageCard>>) {
+	const label = useMemo(() => {
+		if (entity?.pokedexNumber) return String(entity.pokedexNumber);
+		else if (entity?.entityKind) return pascalCase(entity.entityKind);
+		return undefined;
+	}, [entity?.pokedexNumber, entity?.entityKind]);
+
 	return (
 		<ImageCard
 			{...props}
 			className={cn(className)}
 			isLoading={isLoading || entity == null}
 			imageUrl={entity?.imageUrl}
+			label={label}
 			alt={entity?.name ?? 'Loading'}
 			caption={<Caption entity={entity} />}
 		/>
@@ -229,12 +236,7 @@ function Caption({entity}: {entity?: SelectEntity}) {
 		return <Skeleton className='w-full h-6' />;
 	}
 
-	return (
-		<span className='flex justify-between flex-wrap gap-2'>
-			<span>{entity.pokedexNumber ?? pascalCase(entity.entityKind)}</span>{' '}
-			{entity.name}
-		</span>
-	);
+	return <span className='text-left w-full leading-tight'>{entity.name}</span>;
 }
 
 const PokedexPagination = ({
@@ -253,14 +255,14 @@ const PokedexPagination = ({
 						preload='viewport'
 						disabled={page === 0}
 						to={api.path}
-						search={{...search, page: page > 0 ? page - 1 : page} as unknown}
+						search={{...search, page: page > 0 ? page - 1 : page}}
 					/>
 				</PaginationItem>
 				<PaginationItem>
 					<PaginationLink
 						preload='viewport'
 						to={api.path}
-						search={{...search, page} as unknown}
+						search={{...search, page}}
 						isActive
 					>
 						{displayPage}
@@ -271,7 +273,7 @@ const PokedexPagination = ({
 						preload='viewport'
 						disabled={!hasMore}
 						to={api.path}
-						search={{...search, page: page + 1} as unknown}
+						search={{...search, page: page + 1}}
 					/>
 				</PaginationItem>
 			</PaginationContent>

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Skeleton} from '~/components/ui/skeleton';
 import {cn} from '~/lib/utils';
+import {Label} from './label';
 
 type ImageWithSkeletonProps = {
 	src: string;
@@ -9,6 +10,7 @@ type ImageWithSkeletonProps = {
 	className?: string; // wrapper
 	imgClassName?: string; // image
 	aspectRatio?: string; // e.g. "16/9" or "1/1"
+	label?: string;
 	onLoad?: () => void;
 	onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
 };
@@ -22,6 +24,7 @@ export function ImageWithSkeleton({
 	isLoading,
 	onLoad,
 	onError,
+	label,
 }: ImageWithSkeletonProps) {
 	const [loaded, setLoaded] = React.useState(false);
 	const [failed, setFailed] = React.useState(false);
@@ -74,6 +77,12 @@ export function ImageWithSkeleton({
 				<div className='absolute inset-0 grid place-items-center border border-border bg-muted text-muted-foreground text-sm'>
 					Failed to load
 				</div>
+			)}
+
+			{label && (
+				<Label className='pointer-events-none absolute bottom-2 left-2 rounded px-2 py-0.5 text-xs text-foreground bg-background'>
+					{label}
+				</Label>
 			)}
 		</div>
 	);

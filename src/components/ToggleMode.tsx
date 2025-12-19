@@ -25,7 +25,7 @@ export function ToggleMode() {
 				{MODES.map((mode) => (
 					<DropdownMenuItem
 						key={mode.value}
-						className='bg-secondary-background text-black dark:text-white'
+						className='bg-secondary-background text-foreground'
 						onClick={() => setMode(mode.value)}
 					>
 						{mode.name}

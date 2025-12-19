@@ -31,7 +31,7 @@ const ModeProviderContext = createContext<ModeProviderState>(initialState);
 
 export function ModeProvider({
 	children,
-	defaultMode = 'dark',
+	defaultMode = 'system',
 	storageKey = '__current_mode',
 	...props
 }: ModeProviderProps) {

@@ -24,7 +24,7 @@ export function ToggleStyle() {
 				{STYLES.map((styleOption) => (
 					<DropdownMenuItem
 						key={styleOption.value}
-						className='bg-secondary-background text-black dark:text-white'
+						className='bg-secondary-background text-foreground'
 						onClick={() => setStyle(styleOption.value)}
 					>
 						{styleOption.name}
