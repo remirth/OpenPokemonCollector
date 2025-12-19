@@ -138,14 +138,14 @@ function HomeComponent() {
 
 	return (
 		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
-			<Card className='lg:row-span-2 row-span-3 md:max-w-80 h-full min-w-fit gap-4'>
-				<CardHeader className='hidden sm:block'>
+			<Card className='[@media(min-height:900px)]:row-span-2 row-span-3 h-full md:max-w-fit w-full gap-4'>
+				<CardHeader className='hidden [@media(min-height:800px)]:block'>
 					<CardTitle>Pokedex</CardTitle>
 				</CardHeader>
-				<CardContent className='md:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2'>
+				<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit'>
 					<Input
 						defaultValue={search.q}
-						className='max-w-60'
+						className='w-60 min-w-40 shrink'
 						placeholder='Search Query...'
 						onChange={inputChanged}
 					/>
@@ -179,7 +179,10 @@ function HomeComponent() {
 								entity={state.data?.[i]}
 								isLoading={state.isLoading}
 								index={i}
-								className={cn(i >= lastLength && 'hidden')}
+								className={cn(
+									i >= lastLength && 'hidden',
+									'max-w-32 [@media(min-height:900px)]:max-w-44',
+								)}
 							/>
 						);
 					})}
@@ -212,7 +215,7 @@ function EntityCard({
 	return (
 		<ImageCard
 			{...props}
-			className={cn('md:max-w-44 max-w-32', className)}
+			className={cn(className)}
 			isLoading={isLoading || entity == null}
 			imageUrl={entity?.imageUrl}
 			alt={entity?.name ?? 'Loading'}
