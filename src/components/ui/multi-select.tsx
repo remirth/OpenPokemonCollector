@@ -1,5 +1,3 @@
-'use client';
-
 import {CheckIcon, ChevronsUpDown} from 'lucide-react';
 import * as React from 'react';
 
@@ -70,11 +68,6 @@ export function MultiSelect({
 		[isControlled, onValueChange, selectedValues],
 	);
 
-	const labelFor = React.useCallback(
-		(v: string) => options.find((o) => o.value === v)?.label ?? v,
-		[options],
-	);
-
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
@@ -83,16 +76,16 @@ export function MultiSelect({
 					role='combobox'
 					aria-expanded={open}
 					disabled={disabled}
-					className={cn('w-fit min-w-[280px] justify-between', buttonClassName)}
+					className={cn('w-fit min-w-70 justify-between', buttonClassName)}
 				>
 					{selectedValues.length > 0
-						? selectedValues.map(labelFor).join(', ')
+						? `${selectedValues.length} selected`
 						: placeholder}
 					<ChevronsUpDown className='text-muted-foreground' />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className={cn('w-[300px] p-0 border-0', className)}
+				className={cn('w-75 p-0 border-0', className)}
 				align='start'
 			>
 				<Command className='**:data-[slot=command-input-wrapper]:h-11'>
@@ -106,7 +99,7 @@ export function MultiSelect({
 						<CommandEmpty>{emptyLabel}</CommandEmpty>
 						<CommandGroup
 							className={cn(
-								'p-2 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-col [&_[cmdk-group-items]]:gap-1',
+								'p-2 **:[[cmdk-group-items]]:flex **:[[cmdk-group-items]]:flex-col **:[[cmdk-group-items]]:gap-1',
 								commandClassName,
 							)}
 						>
