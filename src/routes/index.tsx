@@ -24,6 +24,7 @@ import {
 } from '~/components/ui/dropdown-menu';
 import ImageCard from '~/components/ui/image-card';
 import {Input} from '~/components/ui/input';
+import {Label} from '~/components/ui/label';
 import {MultiSelect} from '~/components/ui/multi-select';
 import {
 	Pagination,
@@ -139,26 +140,50 @@ function HomeComponent() {
 	return (
 		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
 			<Card className='[@media(min-height:900px)]:row-span-2 row-span-3 h-full md:max-w-fit w-full gap-4'>
-				<CardHeader className='hidden [@media(min-height:800px)]:block'>
+				<CardHeader className='hidden [@media(min-height:1000px)]:block'>
 					<CardTitle>Pokedex</CardTitle>
 				</CardHeader>
-				<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit'>
-					<Input
-						defaultValue={search.q}
-						className='w-60 min-w-40 shrink'
-						placeholder='Search Query...'
-						onChange={inputChanged}
-					/>
-					<MultiSelect
-						searchable={false}
-						onValueChange={multiSelectChanged}
-						buttonClassName='max-w-60 min-w-40 bg-neutral text-foreground'
-						commandClassName='bg-background text-foreground'
-						className='max-w-40'
-						buttonVariant='noShadow'
-						options={MULTI_SELECT_OPTIONS}
-						defaultValue={pageProps.kind}
-					/>
+				<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit items-left content-center'>
+					<div
+						id='search_label'
+						className='flex flex-col gap-1 shrink w-fit max-w-60'
+					>
+						<Label className='ml-1' htmlFor='search'>
+							Name
+						</Label>
+						<Input
+							aria-labelledby='search_label'
+							id='search'
+							name='search'
+							defaultValue={search.q}
+							className=''
+							placeholder='Search...'
+							onChange={inputChanged}
+						/>
+					</div>
+					<div className='flex flex-col gap-1'>
+						<Label
+							className='ml-1'
+							id='entity_kind_label'
+							htmlFor='entity_kind'
+						>
+							Supertypes
+						</Label>
+						<MultiSelect
+							buttonProps={{
+								variant: 'noShadow',
+								id: 'entity_kind',
+								'aria-labelledby': 'entity_kind_label',
+							}}
+							searchable={false}
+							onValueChange={multiSelectChanged}
+							buttonClassName='max-w-60 min-w-40 bg-neutral text-foreground'
+							commandClassName='bg-background text-foreground'
+							className='max-w-40'
+							options={MULTI_SELECT_OPTIONS}
+							defaultValue={pageProps.kind}
+						/>
+					</div>
 				</CardContent>
 			</Card>
 			<Card className='flex flex-col gap-4 w-full row-span-10 min-h-full'>
@@ -170,7 +195,7 @@ function HomeComponent() {
 						maxCount={count.data}
 					/>
 				</CardHeader>
-				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit max-h-full pb-16 overflow-y-auto scrollbar'>
+				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit h-full pb-16 overflow-y-auto scrollbar'>
 					{items.map((_, i) => {
 						return (
 							<EntityCard
@@ -181,7 +206,7 @@ function HomeComponent() {
 								index={i}
 								className={cn(
 									i >= lastLength && 'hidden',
-									'max-w-32 [@media(min-height:900px)]:max-w-44',
+									'max-w-32 [@media(min-height:900px)]:max-w-44 h-fit',
 								)}
 							/>
 						);
@@ -221,6 +246,7 @@ function EntityCard({
 	return (
 		<ImageCard
 			{...props}
+			figCaptionProps={{className: 'h-22 min-h-fit'}}
 			className={cn(className)}
 			isLoading={isLoading || entity == null}
 			imageUrl={entity?.imageUrl}
@@ -233,10 +259,10 @@ function EntityCard({
 
 function Caption({entity}: {entity?: SelectEntity}) {
 	if (!entity) {
-		return <Skeleton className='w-full h-6' />;
+		return <Skeleton className='w-full' />;
 	}
 
-	return <span className='text-left w-full leading-tight'>{entity.name}</span>;
+	return <span className='text-left w-full h-8'>{entity.name}</span>;
 }
 
 const PokedexPagination = ({
@@ -293,7 +319,7 @@ function CardNav(props: {
 
 	return (
 		<>
-			<CardTitle className='font-light'>
+			<CardTitle className='font-light xs:block hidden'>
 				{offset} — {offsetPlusLength} out of {props.maxCount ?? '...'}
 			</CardTitle>
 			<CardDescription className='flex flex-row gap-2'>

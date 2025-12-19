@@ -30,8 +30,8 @@ export type MultiSelectProps = {
 	buttonClassName?: string;
 	commandClassName?: string;
 	searchable?: boolean;
-	buttonVariant?: React.ComponentProps<typeof Button>['variant'];
 	disabled?: boolean;
+	buttonProps?: React.ComponentProps<typeof Button>;
 };
 
 export function MultiSelect({
@@ -46,7 +46,7 @@ export function MultiSelect({
 	commandClassName,
 	className,
 	buttonClassName,
-	buttonVariant = 'noShadow',
+	buttonProps,
 	disabled,
 }: MultiSelectProps) {
 	const [open, setOpen] = React.useState(false);
@@ -72,7 +72,7 @@ export function MultiSelect({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
-					variant={buttonVariant}
+					{...buttonProps}
 					role='combobox'
 					aria-expanded={open}
 					disabled={disabled}

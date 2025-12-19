@@ -9,6 +9,7 @@ type Props = {
 	isLoading?: boolean;
 	label?: string;
 	alt: string;
+	figCaptionProps: React.ComponentProps<'figcaption'>;
 };
 
 export default function ImageCard({
@@ -18,7 +19,9 @@ export default function ImageCard({
 	caption,
 	label,
 	className,
+	figCaptionProps,
 }: Props) {
+	const {className: figCaptionClass, ...rest} = figCaptionProps;
 	return (
 		<figure
 			className={cn(
@@ -34,7 +37,13 @@ export default function ImageCard({
 				isLoading={isLoading}
 				className='object-cover'
 			/>
-			<figcaption className='border-t-2 text-foreground bg-secondary-background border-border p-4 h-full'>
+			<figcaption
+				className={cn(
+					'border-t-2 text-foreground bg-secondary-background border-border p-4 h-full',
+					figCaptionClass,
+				)}
+				{...rest}
+			>
 				{caption}
 			</figcaption>
 		</figure>
