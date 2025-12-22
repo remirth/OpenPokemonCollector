@@ -166,12 +166,14 @@ function HomeComponent() {
 	return (
 		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
 			<PokedexFilter
+				id='large_screen_filter'
 				className='[@media(min-height:900px)]:md:row-span-2 [@media(min-height:900px)]:md:flex hidden md:max-w-fit'
 				pageProps={pageProps}
 			/>
 			<Card className='flex flex-col gap-4 w-full [@media(min-height:900px)]:md:flex:row-span-10 row-span-12 min-h-full'>
-				<CardHeader className='md:flex flex-row justify-between border-b hidden pb-4!'>
+				<CardHeader className='md:flex border-b hidden pb-4!'>
 					<CardNav
+						id='card_header_navigation'
 						pageProps={pageProps}
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
@@ -202,8 +204,9 @@ function HomeComponent() {
 					)}
 				</CardContent>
 
-				<CardFooter className='flex flex-row justify-between border-t md:hidden'>
+				<CardFooter className='flex border-t md:hidden'>
 					<CardNav
+						id='card_footer_navigation'
 						pageProps={pageProps}
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
@@ -309,6 +312,7 @@ function CardNav(props: {
 	maxCount?: number;
 	length?: number;
 	page: number;
+	id: string;
 	pageProps: Entities.UseEntitiesProps;
 }) {
 	const offset = props.page * props.pageSize;
@@ -316,7 +320,7 @@ function CardNav(props: {
 	const hasMore = props.maxCount != null && props.maxCount > offsetPlusLength;
 
 	return (
-		<>
+		<section className='flex flex-row justify-between w-full'>
 			<CardTitle className='font-light xs:block hidden'>
 				{offset} — {offsetPlusLength} out of {props.maxCount ?? '...'}
 			</CardTitle>
@@ -340,13 +344,17 @@ function CardNav(props: {
 							</DialogDescription>
 						</DialogHeader>
 
-						<PokedexFilter pageProps={props.pageProps} className='w-full' />
+						<PokedexFilter
+							pageProps={props.pageProps}
+							className='w-full'
+							id={`${props.id}_filter`}
+						/>
 					</DialogContent>
 				</Dialog>
 				<PokedexPageSize pageSize={props.pageSize} />
 				<PokedexPagination className='mx-0 w-fit' hasMore={hasMore} />
 			</CardDescription>
-		</>
+		</section>
 	);
 }
 
@@ -394,27 +402,34 @@ function PokedexPageSize({
 
 type PokedexFilterProps = {
 	pageProps: Entities.UseEntitiesProps;
+	id: string;
 } & React.ComponentProps<typeof Card>;
 
-function PokedexFilter({pageProps, className, ...rest}: PokedexFilterProps) {
+function PokedexFilter({
+	pageProps,
+	className,
+	id,
+	...rest
+}: PokedexFilterProps) {
 	const {inputChanged, multiSelectChanged} = usePokedexForm();
 
 	return (
-		<Card className={cn('h-full  w-full gap-4', className)} {...rest}>
+		<Card className={cn('h-full  w-full gap-4', className)} id={id} {...rest}>
 			<CardHeader className='hidden [@media(min-height:1000px)]:block'>
 				<CardTitle>Pokedex</CardTitle>
 			</CardHeader>
 			<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit items-left content-center'>
-				<div
-					id='search_label'
-					className='flex flex-col gap-1 shrink w-fit max-w-60'
-				>
-					<Label className='ml-1' htmlFor='search'>
+				<div className='flex flex-col gap-1 shrink w-fit max-w-60'>
+					<Label
+						className='ml-1'
+						htmlFor={`${id}_search`}
+						id={`${id}_search_label`}
+					>
 						Name
 					</Label>
 					<Input
-						aria-labelledby='search_label'
-						id='search'
+						aria-labelledby={`${id}_search_label`}
+						id={`${id}_search`}
 						name='search'
 						defaultValue={pageProps.query}
 						className=''
@@ -423,14 +438,18 @@ function PokedexFilter({pageProps, className, ...rest}: PokedexFilterProps) {
 					/>
 				</div>
 				<div className='flex flex-col gap-1'>
-					<Label className='ml-1' id='entity_kind_label' htmlFor='entity_kind'>
+					<Label
+						className='ml-1'
+						id={`${id}_entity_kind_label`}
+						htmlFor={`${id}_entity_kind`}
+					>
 						Supertypes
 					</Label>
 					<MultiSelect
 						buttonProps={{
 							variant: 'noShadow',
-							id: 'entity_kind',
-							'aria-labelledby': 'entity_kind_label',
+							id: `${id}_entity_kind`,
+							'aria-labelledby': `${id}_entity_kind_label`,
 						}}
 						searchable={false}
 						onValueChange={multiSelectChanged}
