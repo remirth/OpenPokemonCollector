@@ -2,7 +2,7 @@ import {debounce} from '@tanstack/react-pacer';
 import {createFileRoute, redirect, useNavigate} from '@tanstack/react-router';
 import {scope} from 'arktype';
 import {pascalCase} from 'change-case';
-import {ChevronDown} from 'lucide-react';
+import {ChevronDown, Filter} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {truncate} from 'remeda';
 import {Button} from '~/components/ui/button';
@@ -14,6 +14,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/ui/card';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '~/components/ui/dialog';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -55,6 +63,7 @@ const s = scope({
 const pokedexSearchSchema = s.export('search').search;
 const kindArraySchema = s.export('kindArray').kindArray;
 type PokedexSearch = typeof pokedexSearchSchema.infer;
+type KindArray = typeof kindArraySchema.infer;
 
 export const Route = createFileRoute('/')({
 	component: HomeComponent,
@@ -71,7 +80,7 @@ export const Route = createFileRoute('/')({
 				? kindArraySchema.assert(
 						Array.isArray(search.kind) ? search.kind : [search.kind],
 					)
-				: ['pokemon', 'energy', 'trainer'],
+				: undefined,
 		};
 
 		const count = await Entities.loadCount(queryClient, props);
@@ -122,6 +131,8 @@ function usePokedexForm() {
 	);
 }
 
+const ALL_ENTITY_KINDS: KindArray = ['pokemon', 'energy', 'trainer'];
+
 function HomeComponent() {
 	const search = api.useSearch();
 
@@ -134,7 +145,7 @@ function HomeComponent() {
 				? kindArraySchema.assert(
 						Array.isArray(search.kind) ? search.kind : [search.kind],
 					)
-				: ['pokemon', 'energy', 'trainer'],
+				: undefined,
 		}),
 		[search.page, search.pageSize, search.q, search.kind],
 	);
@@ -142,21 +153,11 @@ function HomeComponent() {
 	const entities = Entities.useEntities(pageProps);
 	const count = Entities.useEntityCount(pageProps);
 
-	const _nav = api.useNavigate();
-
-	//  if (
-	//    count.data &&
-	//	) {
-	//    const page = Math.floor(count.data / pageProps.pageSize);
-	//    nav({ search: (prev) => ({ ...prev, page }) });
-	//  }
-
 	const items = useMemo(
 		() => Array.from({length: pageProps.pageSize}).fill(0),
 		[pageProps.pageSize],
 	);
 
-	const {inputChanged, multiSelectChanged} = usePokedexForm();
 	const [lastLength, updateLastLength] = useState(pageProps.pageSize);
 	useEffect(() => {
 		entities.data?.length != null && updateLastLength(entities.data.length);
@@ -164,56 +165,14 @@ function HomeComponent() {
 
 	return (
 		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
-			<Card className='[@media(min-height:900px)]:row-span-2 row-span-3 h-full md:max-w-fit w-full gap-4'>
-				<CardHeader className='hidden [@media(min-height:1000px)]:block'>
-					<CardTitle>Pokedex</CardTitle>
-				</CardHeader>
-				<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit items-left content-center'>
-					<div
-						id='search_label'
-						className='flex flex-col gap-1 shrink w-fit max-w-60'
-					>
-						<Label className='ml-1' htmlFor='search'>
-							Name
-						</Label>
-						<Input
-							aria-labelledby='search_label'
-							id='search'
-							name='search'
-							defaultValue={search.q}
-							className=''
-							placeholder='Search...'
-							onChange={inputChanged}
-						/>
-					</div>
-					<div className='flex flex-col gap-1'>
-						<Label
-							className='ml-1'
-							id='entity_kind_label'
-							htmlFor='entity_kind'
-						>
-							Supertypes
-						</Label>
-						<MultiSelect
-							buttonProps={{
-								variant: 'noShadow',
-								id: 'entity_kind',
-								'aria-labelledby': 'entity_kind_label',
-							}}
-							searchable={false}
-							onValueChange={multiSelectChanged}
-							buttonClassName='max-w-60 min-w-40 bg-neutral text-foreground'
-							commandClassName='bg-background text-foreground'
-							className='max-w-40'
-							options={MULTI_SELECT_OPTIONS}
-							defaultValue={pageProps.kind}
-						/>
-					</div>
-				</CardContent>
-			</Card>
-			<Card className='flex flex-col gap-4 w-full row-span-10 min-h-full'>
+			<PokedexFilter
+				className='[@media(min-height:900px)]:md:row-span-2 [@media(min-height:900px)]:md:flex hidden md:max-w-fit'
+				pageProps={pageProps}
+			/>
+			<Card className='flex flex-col gap-4 w-full [@media(min-height:900px)]:md:flex:row-span-10 row-span-12 min-h-full'>
 				<CardHeader className='md:flex flex-row justify-between border-b hidden pb-4!'>
 					<CardNav
+						pageProps={pageProps}
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
 						length={entities.data?.length}
@@ -240,6 +199,7 @@ function HomeComponent() {
 
 				<CardFooter className='flex flex-row justify-between border-t md:hidden'>
 					<CardNav
+						pageProps={pageProps}
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
 						length={entities.data?.length}
@@ -344,6 +304,7 @@ function CardNav(props: {
 	maxCount?: number;
 	length?: number;
 	page: number;
+	pageProps: Entities.UseEntitiesProps;
 }) {
 	const offset = props.page * props.pageSize;
 	const offsetPlusLength = offset + (props.length ?? props.pageSize);
@@ -354,7 +315,29 @@ function CardNav(props: {
 			<CardTitle className='font-light xs:block hidden'>
 				{offset} — {offsetPlusLength} out of {props.maxCount ?? '...'}
 			</CardTitle>
-			<CardDescription className='flex flex-row gap-2'>
+			<CardDescription className='flex flex-row flex-wrap gap-2'>
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button
+							className='px-2.5 block [@media(min-height:900px)]:md:hidden'
+							variant='noShadow'
+						>
+							<Filter className='size-4' />
+						</Button>
+					</DialogTrigger>
+
+					<DialogContent className='p-3'>
+						<DialogHeader>
+							<DialogTitle>Pokedex</DialogTitle>
+							<DialogDescription>
+								Query the Pokedex here using a free text search or filter based
+								on Supertypes.
+							</DialogDescription>
+						</DialogHeader>
+
+						<PokedexFilter pageProps={props.pageProps} className='w-full' />
+					</DialogContent>
+				</Dialog>
 				<PokedexPageSize pageSize={props.pageSize} />
 				<PokedexPagination className='mx-0 w-fit' hasMore={hasMore} />
 			</CardDescription>
@@ -401,5 +384,59 @@ function PokedexPageSize({
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>
+	);
+}
+
+type PokedexFilterProps = {
+	pageProps: Entities.UseEntitiesProps;
+} & React.ComponentProps<typeof Card>;
+
+function PokedexFilter({pageProps, className, ...rest}: PokedexFilterProps) {
+	const {inputChanged, multiSelectChanged} = usePokedexForm();
+
+	return (
+		<Card className={cn('h-full  w-full gap-4', className)} {...rest}>
+			<CardHeader className='hidden [@media(min-height:1000px)]:block'>
+				<CardTitle>Pokedex</CardTitle>
+			</CardHeader>
+			<CardContent className='[@media(min-height:800px)]:mx-8 flex flex-col md:gap-2 gap-0.5 h-full flex-wrap md:pb-2 w-fit items-left content-center'>
+				<div
+					id='search_label'
+					className='flex flex-col gap-1 shrink w-fit max-w-60'
+				>
+					<Label className='ml-1' htmlFor='search'>
+						Name
+					</Label>
+					<Input
+						aria-labelledby='search_label'
+						id='search'
+						name='search'
+						defaultValue={pageProps.query}
+						className=''
+						placeholder='Search...'
+						onChange={inputChanged}
+					/>
+				</div>
+				<div className='flex flex-col gap-1'>
+					<Label className='ml-1' id='entity_kind_label' htmlFor='entity_kind'>
+						Supertypes
+					</Label>
+					<MultiSelect
+						buttonProps={{
+							variant: 'noShadow',
+							id: 'entity_kind',
+							'aria-labelledby': 'entity_kind_label',
+						}}
+						searchable={false}
+						onValueChange={multiSelectChanged}
+						buttonClassName='max-w-60 min-w-40 bg-neutral text-foreground'
+						commandClassName='bg-background text-foreground'
+						className='max-w-40'
+						options={MULTI_SELECT_OPTIONS}
+						defaultValue={pageProps.kind ?? ALL_ENTITY_KINDS}
+					/>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }

@@ -7,7 +7,7 @@ export namespace Entities {
 	export type UseEntitiesProps = {
 		page: number;
 		pageSize: number;
-		kind: Array<EntityKind>;
+		kind?: Array<EntityKind>;
 		query?: string;
 	};
 
