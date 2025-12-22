@@ -195,6 +195,11 @@ function HomeComponent() {
 							/>
 						);
 					})}
+					{lastLength === 0 && (
+						<p className='w-full text-center font-light'>
+							Search yielded no results.
+						</p>
+					)}
 				</CardContent>
 
 				<CardFooter className='flex flex-row justify-between border-t md:hidden'>
