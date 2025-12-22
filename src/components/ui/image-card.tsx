@@ -8,6 +8,7 @@ type Props = {
 	className?: string;
 	isLoading?: boolean;
 	label?: string;
+	aspectRatio?: string;
 	alt: string;
 	figCaptionProps: React.ComponentProps<'figcaption'>;
 };
@@ -18,6 +19,7 @@ export default function ImageCard({
 	alt,
 	caption,
 	label,
+	aspectRatio,
 	className,
 	figCaptionProps,
 }: Props) {
@@ -30,7 +32,7 @@ export default function ImageCard({
 			)}
 		>
 			<ImageWithSkeleton
-				aspectRatio='4/3'
+				aspectRatio={aspectRatio}
 				alt={alt}
 				label={label}
 				src={imageUrl ?? '/public/puff.svg'}

@@ -123,8 +123,19 @@ function HomeComponent() {
 		}),
 		[search.page, search.pageSize, search.q, search.kind],
 	);
-	const state = Entities.useEntities(pageProps);
+
+	const entities = Entities.useEntities(pageProps);
 	const count = Entities.useEntityCount(pageProps);
+
+	const nav = api.useNavigate();
+
+	if (
+		count.data &&
+		pageProps.page * pageProps.pageSize + pageProps.pageSize > count.data
+	) {
+		const page = Math.floor(count.data / pageProps.pageSize);
+		nav({search: (prev) => ({...prev, page})});
+	}
 
 	const items = useMemo(
 		() => Array.from({length: pageProps.pageSize}).fill(0),
@@ -134,8 +145,8 @@ function HomeComponent() {
 	const {inputChanged, multiSelectChanged} = usePokedexForm();
 	const [lastLength, updateLastLength] = useState(pageProps.pageSize);
 	useEffect(() => {
-		state.data?.length != null && updateLastLength(state.data.length);
-	}, [state.data?.length]);
+		entities.data?.length != null && updateLastLength(entities.data.length);
+	}, [entities.data?.length]);
 
 	return (
 		<section className='grid grid-rows-12 h-full w-full md:p-8 md:gap-4'>
@@ -191,7 +202,7 @@ function HomeComponent() {
 					<CardNav
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
-						length={state.data?.length}
+						length={entities.data?.length}
 						maxCount={count.data}
 					/>
 				</CardHeader>
@@ -201,8 +212,8 @@ function HomeComponent() {
 							<EntityCard
 								// biome-ignore lint/suspicious/noArrayIndexKey: We want to avoid full repaint
 								key={i}
-								entity={state.data?.[i]}
-								isLoading={state.isLoading}
+								entity={entities.data?.[i]}
+								isLoading={entities.isLoading}
 								index={i}
 								className={cn(
 									i >= lastLength && 'hidden',
@@ -217,7 +228,7 @@ function HomeComponent() {
 					<CardNav
 						page={pageProps.page}
 						pageSize={pageProps.pageSize}
-						length={state.data?.length}
+						length={entities.data?.length}
 						maxCount={count.data}
 					/>
 				</CardFooter>
@@ -244,25 +255,32 @@ function EntityCard({
 	}, [entity?.pokedexNumber, entity?.entityKind]);
 
 	return (
-		<ImageCard
-			{...props}
-			figCaptionProps={{className: 'h-22 min-h-fit'}}
-			className={cn(className)}
-			isLoading={isLoading || entity == null}
-			imageUrl={entity?.imageUrl}
-			label={label}
-			alt={entity?.name ?? 'Loading'}
-			caption={<Caption entity={entity} />}
-		/>
+		<Button className={cn(className, 'p-0')}>
+			<ImageCard
+				{...props}
+				aspectRatio='4/3'
+				figCaptionProps={{className: 'h-22 min-h-fit'}}
+				className={'shadow-none drop-shadow-none border-none'}
+				isLoading={isLoading || entity == null}
+				imageUrl={entity?.imageUrl}
+				label={label}
+				alt={entity?.name ?? 'Loading'}
+				caption={<Caption entity={entity} />}
+			/>
+		</Button>
 	);
 }
 
 function Caption({entity}: {entity?: SelectEntity}) {
 	if (!entity) {
-		return <Skeleton className='w-full' />;
+		return <Skeleton className='w-full h-4' />;
 	}
 
-	return <span className='text-left w-full h-8'>{entity.name}</span>;
+	return (
+		<span className='w-full h-full items-start flex text-wrap text-left text-[1.0rem]'>
+			{entity.name}
+		</span>
+	);
 }
 
 const PokedexPagination = ({
