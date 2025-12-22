@@ -10,7 +10,7 @@ export function AppTabs({className}: {className?: string}) {
 				className,
 			)}
 		>
-			<div className='flex justify-around items-center'>
+			<div className='flex justify-around items-center h-full'>
 				{NAVIGABLE_LINKS.map((item) => {
 					const Icon = item.icon;
 					return (
@@ -22,10 +22,10 @@ export function AppTabs({className}: {className?: string}) {
 								'text-sm font-base text-foreground/90',
 								'hover:bg-main/70 hover:text-main-foreground',
 								'data-[status=active]:bg-main data-[status=active]:text-main-foreground',
-								'border-r-4 border-border last:border-r-0',
+								'border-r-4 border-border last:border-r-0 h-full',
 							)}
 						>
-							{Icon && <Icon className='size-5' />}
+							{Icon && <Icon className='size-6' />}
 						</Link>
 					);
 				})}
