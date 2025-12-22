@@ -80,7 +80,7 @@ export function ImageWithSkeleton({
 			)}
 
 			{label && (
-				<Label className='pointer-events-none absolute bottom-2 left-2 rounded px-2 py-0.5 text-xs text-foreground bg-background'>
+				<Label className='pointer-events-none absolute bottom-2 left-2 rounded px-2 py-0.5 text-xs text-foreground bg-background font-mono font-semibold'>
 					{label}
 				</Label>
 			)}

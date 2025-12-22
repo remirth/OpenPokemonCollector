@@ -11,6 +11,7 @@ export function useGitHubStars(enabled = true) {
 	const query = useQuery({
 		queryKey: [key],
 		enabled,
+		gcTime: 7 * 24 * 3600 * 1000,
 		queryFn: async () => {
 			const data = await http(
 				'https://api.github.com/repos/remirth/OpenPokemonCollector',

@@ -1,9 +1,10 @@
 import {debounce} from '@tanstack/react-pacer';
-import {createFileRoute, useNavigate} from '@tanstack/react-router';
+import {createFileRoute, redirect, useNavigate} from '@tanstack/react-router';
 import {scope} from 'arktype';
 import {pascalCase} from 'change-case';
 import {ChevronDown} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
+import {truncate} from 'remeda';
 import {Button} from '~/components/ui/button';
 import {
 	Card,
@@ -62,8 +63,7 @@ export const Route = createFileRoute('/')({
 	loader: async (ctx) => {
 		const queryClient = useQCFromCtx(ctx);
 		const search = pokedexSearchSchema.assert(ctx.location.search);
-
-		await Entities.load(queryClient, {
+		const props: Entities.UseEntitiesProps = {
 			query: search.q,
 			page: search.page ?? 0,
 			pageSize: search.pageSize ?? 50,
@@ -72,7 +72,22 @@ export const Route = createFileRoute('/')({
 						Array.isArray(search.kind) ? search.kind : [search.kind],
 					)
 				: ['pokemon', 'energy', 'trainer'],
-		});
+		};
+
+		const count = await Entities.loadCount(queryClient, props);
+		if (props.page * props.pageSize > count) {
+			throw redirect({
+				to: '/',
+				search: {
+					q: props.query,
+					pageSize: props.pageSize,
+					kind: props.kind,
+					page: Math.floor(count / props.pageSize),
+				},
+			});
+		}
+
+		await Entities.loadEntities(queryClient, props);
 	},
 });
 
@@ -127,15 +142,14 @@ function HomeComponent() {
 	const entities = Entities.useEntities(pageProps);
 	const count = Entities.useEntityCount(pageProps);
 
-	const nav = api.useNavigate();
+	const _nav = api.useNavigate();
 
-	if (
-		count.data &&
-		pageProps.page * pageProps.pageSize + pageProps.pageSize > count.data
-	) {
-		const page = Math.floor(count.data / pageProps.pageSize);
-		nav({search: (prev) => ({...prev, page})});
-	}
+	//  if (
+	//    count.data &&
+	//	) {
+	//    const page = Math.floor(count.data / pageProps.pageSize);
+	//    nav({ search: (prev) => ({ ...prev, page }) });
+	//  }
 
 	const items = useMemo(
 		() => Array.from({length: pageProps.pageSize}).fill(0),
@@ -206,7 +220,7 @@ function HomeComponent() {
 						maxCount={count.data}
 					/>
 				</CardHeader>
-				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-fit h-full pb-16 overflow-y-auto scrollbar'>
+				<CardContent className='flex flex-row flex-wrap gap-4 align-middle w-full h-full pb-16 overflow-y-auto scrollbar content-start'>
 					{items.map((_, i) => {
 						return (
 							<EntityCard
@@ -278,7 +292,7 @@ function Caption({entity}: {entity?: SelectEntity}) {
 
 	return (
 		<span className='w-full h-full items-start flex text-wrap text-left text-[1.0rem]'>
-			{entity.name}
+			{truncate(entity.name, 30, {omission: '...'})}
 		</span>
 	);
 }

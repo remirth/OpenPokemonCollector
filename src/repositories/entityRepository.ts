@@ -90,6 +90,7 @@ export class EntityRepository extends BaseRepository {
 					? this.Q.rankDesc(this.tbl.search, query)
 					: this.$.asc(this.tbl.pokedexNumber),
 				this.$.asc(this.tbl.pokedexNumber),
+				this.$.desc(this.tbl.entityKind),
 				this.$.asc(this.tbl.name),
 			);
 	};

@@ -1,9 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
 @custom-variant dark (&:is(.dark *));
 
+html {
+  font-family: var(--font-sans);
+}
+
 :root {
+
   --background: oklch(95.31% 0.0496 169.04);
   --secondary-background: oklch(100% 0 0);
   --foreground: oklch(0% 0 0);
@@ -21,6 +27,11 @@
   --chart-active-dot: #000;
   --vt-duration: 100ms;
   --vt-ease: cubic-bezier(0.2, 0.8, 0, 1);
+  --font-sans: "Atkinson Hyperlegible", "Public Sans", system-ui, -apple-system, Segoe UI,
+    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular,
+    Menlo, Monaco, Consolas, "Liberation Mono", "Apple Color Emoji",
+    "Segoe UI Emoji", monospace;
 }
 
 .dark {

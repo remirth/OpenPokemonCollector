@@ -13,15 +13,29 @@ export namespace Entities {
 
 	export type UseEntityCountProps = Omit<UseEntitiesProps, 'page' | 'pageSize'>;
 
-	export async function load(client: QueryClient, props: UseEntitiesProps) {
-		await client.ensureQueryData({
-			queryKey: createEntitiesKey(props),
-			queryFn: () => fetchEntities(props),
-		});
+	export async function loadAll(client: QueryClient, props: UseEntitiesProps) {
+		const count = await loadCount(client, props);
+		const entities = await loadEntities(client, props);
+		return {entities, count};
+	}
 
-		await client.ensureQueryData({
+	export async function loadCount(
+		client: QueryClient,
+		props: UseEntitiesProps,
+	) {
+		return client.ensureQueryData({
 			queryKey: createEntityCountKey(props),
 			queryFn: () => fetchEntityCount(props),
+		});
+	}
+
+	export async function loadEntities(
+		client: QueryClient,
+		props: UseEntitiesProps,
+	) {
+		return client.ensureQueryData({
+			queryKey: createEntitiesKey(props),
+			queryFn: () => fetchEntities(props),
 		});
 	}
 

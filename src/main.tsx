@@ -7,6 +7,10 @@ import {addPersistence} from './persist';
 import {RepositoryContext} from './repositories';
 import {makeQueryClient, makeRouter} from './router';
 
+import '@fontsource/public-sans';
+import '@fontsource/atkinson-hyperlegible';
+import '@fontsource/atkinson-hyperlegible-mono';
+
 // Start repo load as soon as possible
 RepositoryContext.get().catch((e) => {
 	console.error(e);
