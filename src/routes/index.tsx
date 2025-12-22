@@ -273,7 +273,7 @@ function EntityCard({
 			<ImageCard
 				{...props}
 				aspectRatio='4/3'
-				figCaptionProps={{className: 'h-22 min-h-fit'}}
+				figCaptionProps={{className: 'h-18 min-h-fit'}}
 				className={'shadow-none drop-shadow-none border-none'}
 				isLoading={isLoading || entity == null}
 				imageUrl={entity?.imageUrl}
