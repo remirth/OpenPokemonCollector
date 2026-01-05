@@ -32,7 +32,7 @@ export function Header({className}: {className?: string}) {
 							<PokeballIcon />
 						</Link>
 					</Button>
-					<span className='text-sm text-muted-foreground xs:block hidden'>
+					<span className='text-sm text-muted-foreground xs:block hidden font-mono'>
 						v{pkg.version}
 					</span>
 				</NavigationMenuItem>
