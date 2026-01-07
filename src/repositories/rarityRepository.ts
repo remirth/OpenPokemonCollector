@@ -17,4 +17,8 @@ export class RarityRepository extends BaseRepository {
 			.then(this.assertFirst(payload.name))
 			.then((row) => row.id);
 	};
+
+	readonly getAll = () => {
+		return this.db.query.rarityTable.findMany();
+	};
 }

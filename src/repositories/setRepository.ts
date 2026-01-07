@@ -17,4 +17,8 @@ export class SetRepository extends BaseRepository {
 			.then(this.assertFirst(set.name))
 			.then((row) => row.id);
 	};
+
+	readonly getAll = async () => {
+		return this.db.query.setTable.findMany();
+	};
 }

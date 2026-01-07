@@ -9,7 +9,7 @@ export namespace Artists {
 		});
 	}
 
-	export const createArtistsKey = () => ['aritsts'];
+	export const createArtistsKey = () => ['artists'];
 
 	async function fetchArtists() {
 		const ctx = await RepositoryContext.get();
