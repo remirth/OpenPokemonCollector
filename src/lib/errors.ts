@@ -50,6 +50,15 @@ export class AssertionError extends AppError {
 
 		return n;
 	}
+
+	static statement<_T extends boolean>(
+		message: string,
+		condition: boolean,
+	): asserts condition is true {
+		if (condition !== true) {
+			throw new AssertionError(`Assertion: ${message}`);
+		}
+	}
 }
 
 export class FetchError extends AppError {

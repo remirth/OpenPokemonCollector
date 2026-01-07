@@ -1,5 +1,10 @@
-import {createReadStream} from 'node:fs';
+import C from 'node:crypto';
+import fs, {createReadStream} from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {createInterface} from 'node:readline';
+import type {Type} from 'arktype';
+import {HttpError} from '~/lib/errors';
 
 export async function* parseNDJSON(path: string) {
 	const stream = createReadStream(path, {encoding: 'utf8'});
@@ -73,7 +78,6 @@ export function cleanCardName(raw: string): string {
 	// Common formatting fixes: capitalize first letter of each word except small words.
 	// Comment out if you want to preserve original casing.
 	name = titleCaseLoose(name);
-
 	return name;
 }
 
@@ -90,4 +94,30 @@ function titleCaseLoose(s: string): string {
 			return lower.charAt(0).toUpperCase() + lower.slice(1);
 		})
 		.join(' ');
+}
+
+function parseJSON(data: string | Buffer) {
+	return JSON.parse(data as string);
+}
+
+const tmpDir = path.join(os.tmpdir(), 'opc_import', 'fetches');
+// biome-ignore lint/suspicious/noExplicitAny: Generic requires any
+export async function cachedJsonFetch<T extends Type<any, any>>(
+	url: string | URL,
+	schema: T,
+): Promise<T['infer']> {
+	await fs.promises.mkdir(tmpDir, {recursive: true});
+	const hash = C.hash('blake2b512', url.toString());
+	const fPath = path.join(tmpDir, `${hash}.json`);
+	if (fs.existsSync(fPath)) {
+		return fs.promises.readFile(fPath).then(parseJSON).then(schema.assert);
+	}
+
+	const data = await fetch(url)
+		.then(HttpError.test)
+		.then((res) => res.json())
+		.then(schema.assert);
+
+	await fs.promises.writeFile(fPath, JSON.stringify(data));
+	return data;
 }

@@ -3,12 +3,13 @@ import {Chan} from 'ts-chan';
 import type {DB} from '~/db';
 import {
 	AppError,
-	HttpError,
+	AssertionError,
 	NotInitializedError,
 	toError,
 } from '../src/lib/errors';
 import type {RepositoryContext} from '../src/repositories';
-import {cleanCardName} from './lib';
+import {type EnergyInfo, getEnergyArchetypes} from './energies';
+import {cachedJsonFetch, cleanCardName} from './lib';
 import {Pokedex} from './pokedex';
 import {
 	type CardFile,
@@ -34,17 +35,12 @@ function getCardImage(set: string, id: string, large: boolean) {
 	return `https://opc-static.remirth.com/cards/${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
 }
 
+function getEnergyImage(energyInfo: EnergyInfo) {
+	return `https://opc-static.remirth.com/energies/${energyInfo.imageName}`;
+}
+
 export async function importData(ctx: RepositoryContext) {
-	let sets: PokemonSetFile;
-	try {
-		sets = await fetch(setUrl)
-			.then(HttpError.test)
-			.then((res) => res.json())
-			.then(PokemonSetFileSchema.assert);
-	} catch (e) {
-		const error = toError(e);
-		throw error;
-	}
+	const sets = await cachedJsonFetch(setUrl, PokemonSetFileSchema);
 
 	if (!sets.length) {
 		throw new AppError('Received no sets from database!');
@@ -144,6 +140,22 @@ async function importSet(
 					)
 					.then((id) => entityIds.push(id));
 			}
+		} else if (entityKind === 'energy') {
+			for await (const energyInfo of getEnergyArchetypes(card.name)) {
+				await ctx.entities
+					.createUniqueBySlug(
+						{
+							entityKind,
+							name: energyInfo.name,
+							imageUrl: getEnergyImage(energyInfo),
+							slug: encodeURIComponent(kebabCase(energyInfo.name)),
+							evolvesFrom: card.evolvesFrom,
+							evolvesTo: card.evolvesTo,
+						},
+						trx,
+					)
+					.then((id) => entityIds.push(id));
+			}
 		} else {
 			const name = cleanCardName(card.name);
 
@@ -161,6 +173,11 @@ async function importSet(
 				)
 				.then((id) => entityIds.push(id));
 		}
+
+		AssertionError.statement(
+			`Expected card: ${card.name} to have at least one corresponding entity`,
+			entityIds.length > 0,
+		);
 
 		let rarityId: number | undefined;
 		if (card.rarity) {
@@ -266,11 +283,10 @@ async function fetchCards(channel: Chan<FetchResult>, sets: PokemonSetFile) {
 		const tasks = sets
 			.sort((a, b) => Date.parse(a.releaseDate) - Date.parse(b.releaseDate))
 			.map(async (set) => {
-				return fetch(`${baseCardUrl}/${set.id}.json`)
-					.then(HttpError.test)
-					.then((res) => res.json())
-					.then(CardFileSchema.assert)
-					.then((cards) => ({set, cards, ok: true as const}));
+				return cachedJsonFetch(
+					`${baseCardUrl}/${set.id}.json`,
+					CardFileSchema,
+				).then((cards) => ({set, cards, ok: true as const}));
 			});
 
 		for (const task of tasks) {
