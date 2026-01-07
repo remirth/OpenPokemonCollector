@@ -1,7 +1,7 @@
 import {DB} from '~/db';
 import {NotInitializedError} from '~/lib/errors';
 import {http} from '~/lib/http';
-import {lazyLoaded} from '~/lib/lazy';
+import {lazyLoadCompleted, lazyLoaded} from '~/lib/lazy';
 import {ArtistRepository} from './artistRepository';
 import {CardRepository} from './cardRepository';
 import {EntityRelationRepository} from './entityRelationRepository';
@@ -42,8 +42,13 @@ export class RepositoryContext {
 		this.entityRelations = new EntityRelationRepository(this);
 	}
 
+	static readonly #CACHE_KEY = 'RepositoryContext';
 	static readonly get = () => {
-		return lazyLoaded('RepositoryContext', this.create);
+		return lazyLoaded(this.#CACHE_KEY, this.create);
+	};
+
+	static readonly hasLoaded = () => {
+		return lazyLoadCompleted(this.#CACHE_KEY);
 	};
 
 	static readonly databaseIsSeeded = async (engine: DB.DatabaseEngine) => {

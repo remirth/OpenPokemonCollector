@@ -18,4 +18,8 @@ export class ArtistRepository extends BaseRepository {
 			.then(this.assertFirst(payload.name))
 			.then((row) => row.id);
 	};
+
+	readonly getAll = async () => {
+		return this.db.query.artistTable.findMany();
+	};
 }

@@ -1,7 +1,7 @@
-// biome-ignore-all lint/style/noNonNullAssertion: We assert all uses of the repo context
 import {type QueryClient, useQuery} from '@tanstack/react-query';
 import type {EntityKind} from 'scripts/schemas';
 import {RepositoryContext} from '~/repositories';
+import {kindArraySchema, type PokedexSearch} from '~/routes';
 
 export namespace Entities {
 	export type UseEntitiesProps = {
@@ -13,10 +13,33 @@ export namespace Entities {
 
 	export type UseEntityCountProps = Omit<UseEntitiesProps, 'page' | 'pageSize'>;
 
-	export async function loadAll(client: QueryClient, props: UseEntitiesProps) {
-		const count = await loadCount(client, props);
-		const entities = await loadEntities(client, props);
-		return {entities, count};
+	export function propsFromPokedexSearch(search: PokedexSearch) {
+		const props: Entities.UseEntitiesProps = {
+			query: search.q,
+			page: search.page ?? 0,
+			pageSize: search.pageSize ?? 50,
+			kind: search.kind
+				? kindArraySchema.assert(
+						Array.isArray(search.kind) ? search.kind : [search.kind],
+					)
+				: undefined,
+		};
+
+		return props;
+	}
+
+	export async function runLoader(
+		client: QueryClient,
+		props: UseEntitiesProps,
+		onOutofBounds: (count: number) => void,
+	) {
+		const count = await Entities.loadCount(client, props);
+		if (props.page * props.pageSize > count) {
+			onOutofBounds(count);
+			return;
+		}
+
+		await Entities.loadEntities(client, props);
 	}
 
 	export async function loadCount(

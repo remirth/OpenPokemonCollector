@@ -61,9 +61,9 @@ const s = scope({
 });
 
 const pokedexSearchSchema = s.export('search').search;
-const kindArraySchema = s.export('kindArray').kindArray;
-type PokedexSearch = typeof pokedexSearchSchema.infer;
-type KindArray = typeof kindArraySchema.infer;
+export const kindArraySchema = s.export('kindArray').kindArray;
+export type PokedexSearch = typeof pokedexSearchSchema.infer;
+export type KindArray = typeof kindArraySchema.infer;
 
 export const Route = createFileRoute('/')({
 	component: HomeComponent,
@@ -72,19 +72,8 @@ export const Route = createFileRoute('/')({
 	loader: async (ctx) => {
 		const queryClient = useQCFromCtx(ctx);
 		const search = pokedexSearchSchema.assert(ctx.location.search);
-		const props: Entities.UseEntitiesProps = {
-			query: search.q,
-			page: search.page ?? 0,
-			pageSize: search.pageSize ?? 50,
-			kind: search.kind
-				? kindArraySchema.assert(
-						Array.isArray(search.kind) ? search.kind : [search.kind],
-					)
-				: undefined,
-		};
-
-		const count = await Entities.loadCount(queryClient, props);
-		if (props.page * props.pageSize > count) {
+		const props = Entities.propsFromPokedexSearch(search);
+		await Entities.runLoader(queryClient, props, (count) => {
 			throw redirect({
 				to: '/',
 				search: {
@@ -94,9 +83,7 @@ export const Route = createFileRoute('/')({
 					page: Math.floor(count / props.pageSize),
 				},
 			});
-		}
-
-		await Entities.loadEntities(queryClient, props);
+		});
 	},
 });
 
@@ -137,16 +124,13 @@ function HomeComponent() {
 	const search = api.useSearch();
 
 	const pageProps: Entities.UseEntitiesProps = useMemo(
-		() => ({
-			page: search.page ?? 0,
-			pageSize: search.pageSize ?? 50,
-			query: search.q,
-			kind: search.kind
-				? kindArraySchema.assert(
-						Array.isArray(search.kind) ? search.kind : [search.kind],
-					)
-				: undefined,
-		}),
+		() =>
+			Entities.propsFromPokedexSearch({
+				q: search.q,
+				page: search.page,
+				pageSize: search.pageSize,
+				kind: search.kind,
+			}),
 		[search.page, search.pageSize, search.q, search.kind],
 	);
 
