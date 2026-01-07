@@ -1,9 +1,10 @@
-import type * as React from 'react';
+import React from 'react';
 import {cn} from '~/lib/utils';
 import {ImageWithSkeleton} from './image-with-loader';
 
 type Props = {
 	imageUrl?: string;
+	backupUrl?: string;
 	caption: React.ReactNode;
 	className?: string;
 	isLoading?: boolean;
@@ -13,17 +14,43 @@ type Props = {
 	figCaptionProps: React.ComponentProps<'figcaption'>;
 };
 
+function useBackup(imageUrl?: string) {
+	const [current, setCurrent] = React.useState(imageUrl ?? '/public/puff.svg');
+	React.useEffect(() => {
+		if (imageUrl) {
+			setCurrent(imageUrl);
+		}
+	}, [imageUrl]);
+
+	const setBackup = React.useCallback(
+		(backup: string) => {
+			if (current !== backup) {
+				setCurrent(backup);
+				return true;
+			} else {
+				return false;
+			}
+		},
+		[current],
+	);
+
+	return [current, setBackup] as const;
+}
+
 export default function ImageCard({
 	imageUrl,
 	isLoading,
 	alt,
 	caption,
 	label,
+	backupUrl,
 	aspectRatio,
 	className,
 	figCaptionProps,
 }: Props) {
+	const [src, setBackup] = useBackup(imageUrl);
 	const {className: figCaptionClass, ...rest} = figCaptionProps;
+
 	return (
 		<figure
 			className={cn(
@@ -35,7 +62,12 @@ export default function ImageCard({
 				aspectRatio={aspectRatio}
 				alt={alt}
 				label={label}
-				src={imageUrl ?? '/public/puff.svg'}
+				src={src}
+				onError={() => {
+					if (backupUrl) {
+						return setBackup(backupUrl);
+					}
+				}}
 				isLoading={isLoading}
 				className='object-cover'
 			/>

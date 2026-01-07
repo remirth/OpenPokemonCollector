@@ -12,7 +12,9 @@ type ImageWithSkeletonProps = {
 	aspectRatio?: string; // e.g. "16/9" or "1/1"
 	label?: string;
 	onLoad?: () => void;
-	onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+	onError?: (
+		e: React.SyntheticEvent<HTMLImageElement, Event>,
+	) => undefined | boolean;
 };
 
 export function ImageWithSkeleton({
@@ -60,8 +62,11 @@ export function ImageWithSkeleton({
 						onLoad?.();
 					}}
 					onError={(e) => {
-						setFailed(true);
-						onError?.(e);
+						if (onError) {
+							setFailed(!onError(e));
+						} else {
+							setFailed(true);
+						}
 					}}
 					className={cn(
 						'absolute inset-0 h-full w-full object-cover transition-opacity duration-300',

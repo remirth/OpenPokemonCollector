@@ -245,6 +245,7 @@ function EntityCard({
 				className={'shadow-none drop-shadow-none border-none'}
 				isLoading={isLoading || entity == null}
 				imageUrl={entity?.imageUrl}
+				backupUrl={entity?.backupImageUrl}
 				label={label}
 				alt={entity?.name ?? 'Loading'}
 				caption={<Caption entity={entity} />}
