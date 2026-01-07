@@ -23,6 +23,7 @@ export const entityTable = SQL.pgTable(
 		entityKind: entityKindEnum('entity_kind').notNull(),
 		pokedexNumber: SQL.integer('pokedex_number').unique(),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
+		backupImageUrl: SQL.varchar('bup_image_url', {length: 255}).notNull(),
 		search: tsvector('search').generatedAlwaysAs(
 			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
 		),
@@ -166,7 +167,11 @@ export const cardTable = SQL.pgTable(
 		rarityId: SQL.integer('rarity_id').references(() => rarityTable.id),
 		numberInSet: SQL.varchar('number_in_set', {length: 255}),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
+		backupImageUrl: SQL.varchar('bup_image_url', {length: 255}).notNull(),
 		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}).notNull(),
+		backupLargeImageUrl: SQL.varchar('bup_large_image_url', {
+			length: 255,
+		}).notNull(),
 		search: tsvector('search').generatedAlwaysAs(
 			(): SQLStatement => sql`public.to_ngrams3(coalesce(name, ''))`,
 		),

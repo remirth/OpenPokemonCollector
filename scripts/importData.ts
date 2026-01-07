@@ -28,15 +28,25 @@ const setUrl = new URL(
 const baseCardUrl = `https://raw.githubusercontent.com/remirth/pokemon-tcg-data/master/cards/en/`;
 
 function getPokedexImage(pokedexNumber: number) {
-	return `https://opc-static.remirth.com/pokedex/${pokedexNumber}.webp`;
+	return {
+		main: `https://opc-static.remirth.com/pokedex/${pokedexNumber}.webp`,
+		backup: `https://raw.githubusercontent.com/remirth/OpenPokemonImages/master/.images/pokedex/${pokedexNumber}.webp`,
+	};
 }
 
 function getCardImage(set: string, id: string, large: boolean) {
-	return `https://opc-static.remirth.com/cards/${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
+	const pathname = `${encodeURIComponent(set)}/${encodeURIComponent(id)}${large ? '_large' : ''}.webp`;
+	return {
+		main: `https://opc-static.remirth.com/cards/${pathname}`,
+		backup: `https://raw.githubusercontent.com/remirth/OpenPokemonImages/master/.images/cards/${pathname}`,
+	};
 }
 
 function getEnergyImage(energyInfo: EnergyInfo) {
-	return `https://opc-static.remirth.com/energies/${energyInfo.imageName}`;
+	return {
+		main: `https://opc-static.remirth.com/energies/${energyInfo.imageName}`,
+		backup: `https://raw.githubusercontent.com/remirth/OpenPokemonImages/master/.images/energies/${energyInfo.imageName}`,
+	};
 }
 
 export async function importData(ctx: RepositoryContext) {
@@ -124,6 +134,7 @@ async function importSet(
 			for (const pokedexNumber of card.nationalPokedexNumbers) {
 				const name = pokedex.get(pokedexNumber);
 				NotInitializedError.assert(`Pokedex Entry for ${pokedexNumber}`, name);
+				const image = getPokedexImage(pokedexNumber);
 
 				await ctx.entities
 					.createUnique(
@@ -132,7 +143,8 @@ async function importSet(
 							name,
 							slug: encodeURIComponent(kebabCase(name)),
 							pokedexNumber,
-							imageUrl: getPokedexImage(pokedexNumber),
+							imageUrl: image.main,
+							backupImageUrl: image.backup,
 							evolvesFrom: card.evolvesFrom,
 							evolvesTo: card.evolvesTo,
 						},
@@ -142,12 +154,14 @@ async function importSet(
 			}
 		} else if (entityKind === 'energy') {
 			for await (const energyInfo of getEnergyArchetypes(card.name)) {
+				const image = getEnergyImage(energyInfo);
 				await ctx.entities
 					.createUniqueBySlug(
 						{
 							entityKind,
 							name: energyInfo.name,
-							imageUrl: getEnergyImage(energyInfo),
+							imageUrl: image.main,
+							backupImageUrl: image.backup,
 							slug: encodeURIComponent(kebabCase(energyInfo.name)),
 							evolvesFrom: card.evolvesFrom,
 							evolvesTo: card.evolvesTo,
@@ -159,12 +173,14 @@ async function importSet(
 		} else {
 			const name = cleanCardName(card.name);
 
+			const image = getCardImage(set.id, card.id, false);
 			await ctx.entities
 				.createUniqueBySlug(
 					{
 						entityKind,
 						name,
-						imageUrl: getCardImage(set.id, card.id, false),
+						imageUrl: image.main,
+						backupImageUrl: image.backup,
 						slug: encodeURIComponent(kebabCase(name)),
 						evolvesFrom: card.evolvesFrom,
 						evolvesTo: card.evolvesTo,
@@ -201,6 +217,8 @@ async function importSet(
 
 		let cardId: number;
 
+		const image = getCardImage(set.id, card.id, false);
+		const largeImage = getCardImage(set.id, card.id, true);
 		cardId = await ctx.cards.createUnique(
 			{
 				externalId: card.id,
@@ -209,8 +227,10 @@ async function importSet(
 				setId,
 				name: card.name,
 				numberInSet: card.number,
-				imageUrl: getCardImage(set.id, card.id, false),
-				imageLargeUrl: getCardImage(set.id, card.id, true),
+				imageUrl: image.main,
+				backupImageUrl: image.backup,
+				imageLargeUrl: largeImage.main,
+				backupLargeImageUrl: largeImage.backup,
 			},
 			trx,
 		);

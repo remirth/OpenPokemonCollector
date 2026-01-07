@@ -15,7 +15,9 @@ CREATE TABLE "cards" (
 	"rarity_id" integer,
 	"number_in_set" varchar(255),
 	"image_url" varchar(255) NOT NULL,
+	"bup_image_url" varchar(255) NOT NULL,
 	"image_large_url" varchar(255) NOT NULL,
+	"bup_large_image_url" varchar(255) NOT NULL,
 	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "cards_external_id_unique" UNIQUE("external_id")
 );
@@ -54,6 +56,7 @@ CREATE TABLE "entities" (
 	"entity_kind" "entity_kind_enum" NOT NULL,
 	"pokedex_number" integer,
 	"image_url" varchar(255) NOT NULL,
+	"bup_image_url" varchar(255) NOT NULL,
 	"search" "tsvector" GENERATED ALWAYS AS (public.to_ngrams3(coalesce(name, ''))) STORED,
 	CONSTRAINT "entities_name_unique" UNIQUE("name"),
 	CONSTRAINT "entities_slug_unique" UNIQUE("slug"),
