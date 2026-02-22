@@ -227,6 +227,7 @@ async function importSet(
 				setId,
 				name: card.name,
 				numberInSet: card.number,
+				orderInSet: i + 1,
 				imageUrl: image.main,
 				backupImageUrl: image.backup,
 				imageLargeUrl: largeImage.main,

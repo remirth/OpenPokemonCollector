@@ -20,6 +20,6 @@ export class ArtistRepository extends BaseRepository {
 	};
 
 	readonly getAll = async () => {
-		return this.db.query.artistTable.findMany();
+		return this.db.select().from(this.tbl).orderBy(this.tbl.name);
 	};
 }

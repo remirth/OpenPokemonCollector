@@ -14,6 +14,7 @@ CREATE TABLE "cards" (
 	"artist_id" integer,
 	"rarity_id" integer,
 	"number_in_set" varchar(255),
+	"order_in_set" integer,
 	"image_url" varchar(255) NOT NULL,
 	"bup_image_url" varchar(255) NOT NULL,
 	"image_large_url" varchar(255) NOT NULL,
@@ -126,6 +127,7 @@ CREATE UNIQUE INDEX "artists_name_idx" ON "artists" USING btree ("name");--> sta
 CREATE INDEX "artists_search_idx" ON "artists" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "card_external_idx" ON "cards" USING btree ("external_id");--> statement-breakpoint
 CREATE INDEX "card_rarity_idx" ON "cards" USING btree ("rarity_id");--> statement-breakpoint
+CREATE INDEX "card_order" ON "cards" USING btree ("order_in_set");--> statement-breakpoint
 CREATE INDEX "card_set_idx" ON "cards" USING btree ("set_id");--> statement-breakpoint
 CREATE INDEX "card_artist_idx" ON "cards" USING btree ("artist_id");--> statement-breakpoint
 CREATE INDEX "card_name_idx" ON "cards" USING btree ("name");--> statement-breakpoint
@@ -149,6 +151,7 @@ CREATE INDEX "entity_search_idx" ON "entities" USING gin ("search");--> statemen
 CREATE UNIQUE INDEX "rarities_name_idx" ON "rarities" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "sets_name_idx" ON "sets" USING btree ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "sets_external_idx" ON "sets" USING btree ("external_id");--> statement-breakpoint
+CREATE INDEX "sets_release_date" ON "sets" USING btree ("release_date");--> statement-breakpoint
 CREATE INDEX "sets_search_idx" ON "sets" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "subtypes_name_idx" ON "subtypes" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "subtype_kind_idx" ON "subtypes" USING btree ("entity_kind");--> statement-breakpoint

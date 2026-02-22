@@ -19,6 +19,6 @@ export class SetRepository extends BaseRepository {
 	};
 
 	readonly getAll = async () => {
-		return this.db.query.setTable.findMany();
+		return this.db.select().from(this.tbl).orderBy(this.tbl.releaseDate);
 	};
 }

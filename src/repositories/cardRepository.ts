@@ -1,4 +1,5 @@
 import type {InsertCard} from '~/db/schema';
+import {arrayHasItems} from '~/lib/utils';
 import {BaseRepository} from './baseRepository';
 
 export class CardRepository extends BaseRepository {
@@ -34,12 +35,19 @@ export class CardRepository extends BaseRepository {
 			.select()
 			.from(this.tbl)
 			.innerJoin(this.relations, this.$.eq(this.tbl.id, this.relations.cardId))
+			.innerJoin(this.T.setTable, this.$.eq(this.tbl.setId, this.T.setTable.id))
 			.where(
 				this.$.and(
-					sets ? this.$.inArray(this.tbl.setId, sets) : undefined,
-					artists ? this.$.inArray(this.tbl.artistId, artists) : undefined,
-					rarities ? this.$.inArray(this.tbl.rarityId, rarities) : undefined,
-					entities
+					arrayHasItems(sets)
+						? this.$.inArray(this.tbl.setId, sets)
+						: undefined,
+					arrayHasItems(artists)
+						? this.$.inArray(this.tbl.artistId, artists)
+						: undefined,
+					arrayHasItems(rarities)
+						? this.$.inArray(this.tbl.rarityId, rarities)
+						: undefined,
+					arrayHasItems(entities)
 						? this.$.inArray(this.relations.entityId, entities)
 						: undefined,
 					query
@@ -55,8 +63,8 @@ export class CardRepository extends BaseRepository {
 			.orderBy(
 				query
 					? this.Q.rankDesc(this.tbl.search, query)
-					: this.$.asc(this.tbl.name),
-				this.$.asc(this.tbl.name),
+					: this.$.asc(this.T.setTable.releaseDate),
+				this.$.asc(this.tbl.orderInSet),
 			);
 	};
 
@@ -74,10 +82,16 @@ export class CardRepository extends BaseRepository {
 			.innerJoin(this.relations, this.$.eq(this.tbl.id, this.relations.cardId))
 			.where(
 				this.$.and(
-					sets ? this.$.inArray(this.tbl.setId, sets) : undefined,
-					artists ? this.$.inArray(this.tbl.artistId, artists) : undefined,
-					rarities ? this.$.inArray(this.tbl.rarityId, rarities) : undefined,
-					entities
+					arrayHasItems(sets)
+						? this.$.inArray(this.tbl.setId, sets)
+						: undefined,
+					arrayHasItems(artists)
+						? this.$.inArray(this.tbl.artistId, artists)
+						: undefined,
+					arrayHasItems(rarities)
+						? this.$.inArray(this.tbl.rarityId, rarities)
+						: undefined,
+					arrayHasItems(entities)
 						? this.$.inArray(this.relations.entityId, entities)
 						: undefined,
 					query

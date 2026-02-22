@@ -144,6 +144,7 @@ export const setTable = SQL.pgTable(
 		return [
 			SQL.uniqueIndex('sets_name_idx').on(tbl.name),
 			SQL.uniqueIndex('sets_external_idx').on(tbl.externalId),
+			SQL.index('sets_release_date').on(tbl.releaseDate),
 			SQL.index('sets_search_idx').using('gin', tbl.search),
 		];
 	},
@@ -166,6 +167,7 @@ export const cardTable = SQL.pgTable(
 		artistId: SQL.integer('artist_id').references(() => artistTable.id),
 		rarityId: SQL.integer('rarity_id').references(() => rarityTable.id),
 		numberInSet: SQL.varchar('number_in_set', {length: 255}),
+		orderInSet: SQL.integer('order_in_set').notNull(),
 		imageUrl: SQL.varchar('image_url', {length: 255}).notNull(),
 		backupImageUrl: SQL.varchar('bup_image_url', {length: 255}).notNull(),
 		imageLargeUrl: SQL.varchar('image_large_url', {length: 255}).notNull(),
@@ -180,6 +182,7 @@ export const cardTable = SQL.pgTable(
 		return [
 			SQL.uniqueIndex('card_external_idx').on(tbl.externalId),
 			SQL.index('card_rarity_idx').on(tbl.rarityId),
+			SQL.index('card_order').on(tbl.orderInSet),
 			SQL.index('card_set_idx').on(tbl.setId),
 			SQL.index('card_artist_idx').on(tbl.artistId),
 			SQL.index('card_name_idx').on(tbl.name),

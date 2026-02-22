@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createInterface} from 'node:readline';
 import type {Type} from 'arktype';
-import {HttpError} from '~/lib/errors';
+import {AssertionError, HttpError} from '~/lib/errors';
 
 export async function* parseNDJSON(path: string) {
 	const stream = createReadStream(path, {encoding: 'utf8'});
@@ -120,4 +120,32 @@ export async function cachedJsonFetch<T extends Type<any, any>>(
 
 	await fs.promises.writeFile(fPath, JSON.stringify(data));
 	return data;
+}
+
+export function orderInSet(value: string): number {
+	const n = value.replace(/\D+/g, '');
+	if (value === n) {
+		return AssertionError.isNotNaN(
+			`ParseINT Order in set: ${n}`,
+			Number.parseInt(n, 10),
+		);
+	}
+
+	if (value.length === 1 && n.length === 1) {
+		console.log('CharCodeAt', value, value.charCodeAt(0) - 64);
+		return value.charCodeAt(0) - 64;
+	}
+
+	if (value === '!') {
+		return 27;
+	} else if (value === '?') {
+		return 28;
+	}
+
+	console.log('STRIPPED', value, n);
+
+	return AssertionError.isNotNaN(
+		`STRIPPED Order in set: ${value}/${n}`,
+		Number.parseInt(n, 10),
+	);
 }

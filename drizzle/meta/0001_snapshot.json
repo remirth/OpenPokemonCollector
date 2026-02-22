@@ -1,6 +1,6 @@
 {
-	"id": "1dc71348-7af3-4524-a500-4e622b677297",
-	"prevId": "00000000-0000-0000-0000-000000000000",
+	"id": "02d0e83f-9092-43f3-9cd1-3495f79fd98e",
+	"prevId": "1dc71348-7af3-4524-a500-4e622b677297",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -148,7 +148,7 @@
 					"name": "order_in_set",
 					"type": "integer",
 					"primaryKey": false,
-					"notNull": false
+					"notNull": true
 				},
 				"image_url": {
 					"name": "image_url",

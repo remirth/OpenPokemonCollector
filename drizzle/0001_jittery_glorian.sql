@@ -1,0 +1,1 @@
+ALTER TABLE "cards" ALTER COLUMN "order_in_set" SET NOT NULL;
